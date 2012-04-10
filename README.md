@@ -11,10 +11,10 @@
 
 1. 获取源代码：
 
-    `git clone git://github.com/why404/qiniu-s3-php-sdk-example.git photoapp`
-    `cd photoapp`
-    `git submodule init`
-    `git submodule update`
+    `git clone git://github.com/why404/qiniu-s3-php-sdk-example.git photoapp`  
+    `cd photoapp`  
+    `git submodule init`  
+    `git submodule update`  
 
 2. 用MySQL source命令（或phpMyAdmin）依次导入 sql/ 目录下的数据库和表结构源文件
 3. Web服务器(比如Nginx或Apache)将应用程序的根目录指向 public/
