@@ -1,0 +1,3 @@
+[submodule "lib/3rd/qiniu"]
+	path = lib/3rd/qiniu
+	url = git://github.com/qiniu/php5.3-sdk.git
