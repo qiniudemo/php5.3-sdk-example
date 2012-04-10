@@ -25,7 +25,7 @@
 
 5. PHP SDK 配置文件在 lib/3rd/qiniu/qbox/config.php 里边，可以修改七牛云存储远程服务主机等。
 
-### 资源
+## 资源
 
 - [七牛云存储官方网站](http://www.qiniutek.com)
 - [七牛云存储开发者中心](https://dev.qiniutek.com)
