@@ -72,22 +72,31 @@ function fileDialogComplete(numFilesSelected, numFilesQueued) {
 	}
 }
 
+/*
+ * 定义一个文件上传前要执行的业务逻辑
+ */
 function uploadStart(file) {
 	try {
-		/* I don't want to do any file validation or anything,  I'll just update the UI and
-		return true to indicate that the upload should start.
-		It's important to update the UI here because in Linux no uploadProgress events are called. The best
-		we can do is say we are uploading.
-		 */
 		var progress = new FileProgress(file, this.customSettings.progressTarget);
 		progress.setStatus("Uploading...");
 		progress.toggleCancel(true, this);
 
-                // add action param
+                // 首先，为该文件生成一个唯一ID
+                // uniqid() 函数在 public/js/uniqid.js 文件中有定义
                 var fileUniqKey = uniqid(file.name);
+
+                // 然后构造 action 表单域的值
+                // generate_rs_put_path() 在 public/js/helper.js 中有定义
                 var action = generate_rs_put_path(rsTableName, fileUniqKey, file.type);
+
+                // 给隐形表单添加名为 action 的 input 域（字段）
                 this.addPostParam("action", action);
-                this.addPostParam("params", action); // whatever, just make a value for callback our server
+
+                // 给隐形表单添加名为 params 的 input 域（字段）
+                // params 里边的数据，用于文件上传成功后，七牛云存储服务器向我们的业务服务器执行 POST 回调
+                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type);
+
+                // 将该文件唯一ID临时保存起来供后续使用
                 this.customSettings.fileUniqIdMapping[file.id] = fileUniqKey;
 	}
 	catch (ex) {}
@@ -107,6 +116,9 @@ function uploadProgress(file, bytesLoaded, bytesTotal) {
 	}
 }
 
+/*
+ * 定义一个文件上传成功后要处理的业务逻辑
+ */
 function uploadSuccess(file, serverData) {
 	try {
 		var progress = new FileProgress(file, this.customSettings.progressTarget);
@@ -114,8 +126,10 @@ function uploadSuccess(file, serverData) {
 		progress.setStatus("Complete.");
 		progress.toggleCancel(false);
 
-                // store
+                // 取出之前在 uploadStart() 暂存的文件唯一ID
                 var fileUniqKey = this.customSettings.fileUniqIdMapping[file.id];
+
+                // 组织要回调给网站业务服务器的数据
                 var postData = {
                     "action": "insert",
                     "file_key": fileUniqKey,
@@ -123,6 +137,8 @@ function uploadSuccess(file, serverData) {
                     "file_size": file.size,
                     "file_type": file.type
                 };
+
+                // 通过AJAX异步向网站业务服务器POST数据
                 $.ajax({
                     type: "POST",
                     url: 'callback.php',
@@ -134,7 +150,7 @@ function uploadSuccess(file, serverData) {
                     success:function(resp){}
                 });
 
-                // preview
+                // 预览
                 /*
                 $.ajax({
                     type: "POST",
