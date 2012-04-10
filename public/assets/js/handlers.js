@@ -82,11 +82,11 @@ function uploadStart(file) {
 		progress.toggleCancel(true, this);
 
                 // 首先，为该文件生成一个唯一ID
-                // uniqid() 函数在 public/js/uniqid.js 文件中有定义
+                // uniqid() 函数在 public/assets/js/uniqid.js 文件中有定义
                 var fileUniqKey = uniqid(file.name);
 
                 // 然后构造 action 表单域的值
-                // generate_rs_put_path() 在 public/js/helper.js 中有定义
+                // generate_rs_put_path() 在 public/assets/js/helper.js 中有定义
                 var action = generate_rs_put_path(rsTableName, fileUniqKey, file.type);
 
                 // 给隐形表单添加名为 action 的 input 域（字段）

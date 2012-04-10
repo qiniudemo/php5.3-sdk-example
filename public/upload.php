@@ -38,24 +38,24 @@ if ($code == 200) {
 <script type="text/javascript">
     var rsTableName = '<?php echo $tableName; ?>';
 </script>
-<link href="css/default.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/utf8_encode.js"></script>
-<script type="text/javascript" src="js/utf8_decode.js"></script>
-<script type="text/javascript" src="js/base64_encode.js"></script>
-<script type="text/javascript" src="js/base64_decode.js"></script>
-<script type="text/javascript" src="js/uniqid.js"></script>
-<script type="text/javascript" src="js/helper.js"></script>
-<script type="text/javascript" src="swfupload/swfupload.js"></script>
-<script type="text/javascript" src="js/swfupload.queue.js"></script>
-<script type="text/javascript" src="js/fileprogress.js"></script>
-<script type="text/javascript" src="js/handlers.js"></script>
+<link href="assets/css/default.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="assets/js/jquery.js"></script>
+<script type="text/javascript" src="assets/js/utf8_encode.js"></script>
+<script type="text/javascript" src="assets/js/utf8_decode.js"></script>
+<script type="text/javascript" src="assets/js/base64_encode.js"></script>
+<script type="text/javascript" src="assets/js/base64_decode.js"></script>
+<script type="text/javascript" src="assets/js/uniqid.js"></script>
+<script type="text/javascript" src="assets/js/helper.js"></script>
+<script type="text/javascript" src="assets/swfupload/swfupload.js"></script>
+<script type="text/javascript" src="assets/js/swfupload.queue.js"></script>
+<script type="text/javascript" src="assets/js/fileprogress.js"></script>
+<script type="text/javascript" src="assets/js/handlers.js"></script>
 <script type="text/javascript">
     var swfu;
 
     window.onload = function() {
         var settings = {
-            flash_url : "swfupload/swfupload.swf",
+            flash_url : "assets/swfupload/swfupload.swf",
             upload_url: "<?php echo $upload_url; ?>",
             post_params: {},
             use_query_string: false,
@@ -73,21 +73,21 @@ if ($code == 200) {
             debug: false,
 
             // Button Settings
-            button_image_url : "images/XPButtonUploadText_61x22.png",
+            button_image_url : "assets/images/XPButtonUploadText_61x22.png",
             button_placeholder_id : "spanButtonPlaceholder1",
             button_width: 61,
             button_height: 22,
 
             // The event handler functions are defined in handlers.js
             file_queued_handler : fileQueued,
-	    file_queue_error_handler : fileQueueError,
-	    file_dialog_complete_handler : fileDialogComplete,
-	    upload_start_handler : uploadStart,
-	    upload_progress_handler : uploadProgress,
-	    upload_error_handler : uploadError,
-	    upload_success_handler : uploadSuccess,
-	    upload_complete_handler : uploadComplete,
-	    queue_complete_handler : queueComplete	// Queue plugin event
+            file_queue_error_handler : fileQueueError,
+            file_dialog_complete_handler : fileDialogComplete,
+            upload_start_handler : uploadStart,
+            upload_progress_handler : uploadProgress,
+            upload_error_handler : uploadError,
+            upload_success_handler : uploadSuccess,
+            upload_complete_handler : uploadComplete,
+            queue_complete_handler : queueComplete	// Queue plugin event
 	};
 
 	swfu = new SWFUpload(settings);

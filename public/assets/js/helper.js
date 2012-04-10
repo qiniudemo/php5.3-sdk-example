@@ -2,7 +2,7 @@
 // 生成用于URL安全传输的base64编码字符
 function urlsafe_base64_encode(content)
 {
-    // base64_encode() 方法在 public/js/base64_encode.js 中有定义
+    // base64_encode() 方法在 public/assets/js/base64_encode.js 中有定义
     return base64_encode(content).replace(/\+/g, '-').replace(/\//g, '_');
 }
 
