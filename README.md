@@ -11,10 +11,10 @@
 
 1. 获取源代码：
 
-    `git clone git://github.com/why404/qiniu-s3-php-sdk-example.git photoapp`  
-    `cd photoapp`  
-    `git submodule init`  
-    `git submodule update`  
+    `git clone git://github.com/why404/qiniu-s3-php-sdk-example.git photoapp`
+    `cd photoapp`
+    `git submodule init`
+    `git submodule update`
 
 2. 用MySQL source命令（或phpMyAdmin）依次导入 sql/ 目录下的数据库和表结构源文件
 3. Web服务器(比如Nginx或Apache)将应用程序的根目录指向 public/
@@ -24,7 +24,7 @@
 
 1. WEB 批量上传组件用的开源 [SWFUpload v2.2.0.1](http://code.google.com/p/swfupload/)。
 
-2. 相关钩子调用参考 public/js/handlers.js 文件中的 uploadStart(), uploadSuccess(), uploadComplete() 方法。
+2. 相关钩子调用参考 public/assets/js/handlers.js 文件中的 uploadStart(), uploadSuccess(), uploadComplete() 方法。
 
 3. public/rs_xhr.php 和 public/op_xhr.php 两个文件在本示例中暂未用到，这两个文件封装的是php sdk接口的ajax请求和响应输出。由于当前这个demo的交互比较简单，所以没有用到。
 
