@@ -28,10 +28,10 @@ $config = array(
 
     # qiniu s3 account
     'qbox' => array(
-        'username' => 'test@qbox.net',
-        'password' => 'test',
-        'io_host'  => 'http://io.qbox.me', # as same in lib/3rd/qiniu/qbox/config.php
-        'tb_name'  => 'photo360_albums',
+        'access_key' => '<Please apply your access key>',
+        'secret_key' => '<Dont send your secret key to anyone>',
+        'io_host'    => 'http://iovip.qbox.me', # as same in lib/3rd/qiniu/qbox/config.php
+        'tb_name'    => 'photo360_albums',
     ),
 
 );
