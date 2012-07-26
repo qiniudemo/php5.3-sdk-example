@@ -44,7 +44,7 @@ $db = Core_Db::getInstance($config["db"]);
 /**
  * 配置七牛云存储密钥信息
  */
-$QBOX_SECRET_KEY = $config["qbox"]["access_key"];
+$QBOX_ACCESS_KEY = $config["qbox"]["access_key"];
 $QBOX_SECRET_KEY = $config["qbox"]["secret_key"];
 
 /**
