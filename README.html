@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{margin:0;padding:0;}
+body {
+	font:13.34px helvetica,arial,freesans,clean,sans-serif;
+	color:black;
+	line-height:1.4em;
+	background-color: #F8F8F8;
+	padding: 0.7em;
+}
+p {
+	margin:1em 0;
+	line-height:1.5em;
+}
+table {
+	font-size:inherit;
+	font:100%;
+	margin:1em;
+}
+table th{border-bottom:1px solid #bbb;padding:.2em 1em;}
+table td{border-bottom:1px solid #ddd;padding:.2em 1em;}
+input[type=text],input[type=password],input[type=image],textarea{font:99% helvetica,arial,freesans,sans-serif;}
+select,option{padding:0 .25em;}
+optgroup{margin-top:.5em;}
+pre,code{font:12px Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;}
+pre {
+	margin:1em 0;
+	font-size:12px;
+	background-color:#eee;
+	border:1px solid #ddd;
+	padding:5px;
+	line-height:1.5em;
+	color:#444;
+	overflow:auto;
+	-webkit-box-shadow:rgba(0,0,0,0.07) 0 1px 2px inset;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;border-radius:3px;
+}
+pre code {
+	padding:0;
+	font-size:12px;
+	background-color:#eee;
+	border:none;
+}
+code {
+	font-size:12px;
+	background-color:#f8f8ff;
+	color:#444;
+	padding:0 .2em;
+	border:1px solid #dedede;
+}
+img{border:0;max-width:100%;}
+abbr{border-bottom:none;}
+a{color:#4183c4;text-decoration:none;}
+a:hover{text-decoration:underline;}
+a code,a:link code,a:visited code{color:#4183c4;}
+h2,h3{margin:1em 0;}
+h1,h2,h3,h4,h5,h6{border:0;}
+h1{font-size:170%;border-top:4px solid #aaa;padding-top:.5em;margin-top:1.5em;}
+h1:first-child{margin-top:0;padding-top:.25em;border-top:none;}
+h2{font-size:150%;margin-top:1.5em;border-top:4px solid #e0e0e0;padding-top:.5em;}
+h3{margin-top:1em;}
+hr{border:1px solid #ddd;}
+ul{margin:1em 0 1em 2em;}
+ol{margin:1em 0 1em 2em;}
+ul li,ol li{margin-top:.5em;margin-bottom:.5em;}
+ul ul,ul ol,ol ol,ol ul{margin-top:0;margin-bottom:0;}
+blockquote{margin:1em 0;border-left:5px solid #ddd;padding-left:.6em;color:#555;}
+dt{font-weight:bold;margin-left:1em;}
+dd{margin-left:2em;margin-bottom:1em;}
+@media screen and (min-width: 768px) {
+    body {
+        width: 748px;
+        margin:10px auto;
+    }
+}
+</style>
+<title> 一个基于  七牛云存储   PHP 5.3 SDK  开发的示例相册程序。 
+
+ 运行环境 
+
+ 
+ PHP5 或以上版本 
+ PHP 库依赖 curl , </title>
+</head>
+<body>
+<p>一个基于 <a href="http://www.qiniutek.com">七牛云存储</a> <a href="https://github.com/qiniu/php5.3-sdk">PHP 5.3 SDK</a> 开发的示例相册程序。</p>
+
+<h2>运行环境</h2>
+
+<ul>
+<li>PHP5 或以上版本</li>
+<li>PHP 库依赖 curl , PDO, PDO_MySQL</li>
+<li>MySQL5 或以上版本</li>
+</ul>
+
+
+<h2>安装和运行程序</h2>
+
+<ol>
+<li><p>获取源代码：</p>
+
+<p> <code>git clone git://github.com/qiniu/php5.3-sdk-example.git photoapp &amp;&amp; cd photoapp</code></p></li>
+<li><p>编辑 <code>lib/config.php</code> 文件，修改其中字段 <code>access_key</code> 和 <code>secret_key</code> 的值。参考 <a href="http://docs.qiniutek.com/v2/sdk/php5-3/#acc-appkey">应用接入：获取Access Key 和 Secret Key</a> 。您也可以修改 <code>bucket</code> 的值为任意的有效字符。</p></li>
+<li>用MySQL source命令（或phpMyAdmin）依次导入 sql/ 目录下的数据库和表结构源文件</li>
+<li>Web服务器(比如Nginx或Apache)将应用程序的根目录指向 public/</li>
+<li>确定MySQL和Web Server正常运行，完成以上两步，即可在浏览器中体验</li>
+</ol>
+
+
+<h2>说明</h2>
+
+<ol>
+<li><p>WEB 批量上传组件用的开源 <a href="http://code.google.com/p/swfupload/">SWFUpload v2.2.0.1</a>。</p></li>
+<li><p>相关钩子调用参考 <code>public/assets/js/handlers.js</code> 文件中的 <code>uploadStart()</code>, <code>uploadSuccess()</code>, <code>uploadComplete()</code> 方法。</p></li>
+<li><p><code>public/rs_xhr.php</code> 和 <code>public/op_xhr.php</code> 两个文件在本示例中暂未用到，这两个文件封装的是php sdk接口的ajax请求和响应输出。由于当前这个demo的交互比较简单，所以没有用到。</p></li>
+<li><p>示例程序的七牛云存储认证帐号请在 <code>lib/config.php</code> 自行更改，这个文件可以修改程序其他设置比如数据库配置等。</p></li>
+<li><p>PHP SDK 配置文件在 <code>lib/3rd/qiniu/qbox/config.php</code> 里边，可以修改七牛云存储远程服务主机等。</p></li>
+</ol>
+
+
+<h2>资源</h2>
+
+<ul>
+<li><a href="http://docs.qiniutek.com/v2/sdk/php5-3/">PHP5.3 SDK 使用指南</a></li>
+<li><a href="http://docs.qiniutek.com/v2/sdk/php5-3/#web-upload-files-directly">用PHP编写的网站，如何让网站用户在浏览器网页中直接向七牛云存储上传文件？</a></li>
+</ul>
+
+</body>
+</html>

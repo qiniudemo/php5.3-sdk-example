@@ -55,5 +55,5 @@ $client = QBox\OAuth2\NewClient();
 /**
  * 初始化 Qbox Reource Service Transport
  */
-$bucket = $config["qbox"]["tb_name"];
+$bucket = $config["qbox"]["bucket"];
 $rs = QBox\RS\NewService($client, $bucket);
