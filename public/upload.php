@@ -36,7 +36,7 @@ if ($code == 200) {
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>相册 - 上传图片</title>
 <script type="text/javascript">
-    var rsTableName = '<?php echo $tableName; ?>';
+    var $bucket = '<?php echo $bucket; ?>';
 </script>
 <link href="assets/css/default.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="assets/js/jquery.js"></script>

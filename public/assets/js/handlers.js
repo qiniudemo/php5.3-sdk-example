@@ -87,7 +87,7 @@ function uploadStart(file) {
 
                 // 然后构造 action 表单域的值
                 // generate_rs_put_path() 在 public/assets/js/helper.js 中有定义
-                var action = generate_rs_put_path(rsTableName, fileUniqKey, file.type);
+                var action = generate_rs_put_path($bucket, fileUniqKey, file.type);
 
                 // 给隐形表单添加名为 action 的 input 域（字段）
                 this.addPostParam("action", action);
@@ -227,7 +227,7 @@ function uploadError(file, errorCode, message) {
 function uploadComplete(file) {
 	if (this.getStats().files_queued === 0) {
 		document.getElementById(this.customSettings.cancelButtonId).disabled = true;
-                window.setTimeout(function(){window.location.href = "index.php";}, 1500);
+        window.setTimeout(function(){window.location.href = "index.php";}, 1500);
 	}
 }
 
