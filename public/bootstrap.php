@@ -18,7 +18,7 @@ date_default_timezone_set('Asia/Shanghai');
  */
 define('ROOT_DIR', str_replace(array('\\\\', '//'), DIRECTORY_SEPARATOR, dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
 define('LIB_DIR', ROOT_DIR . 'lib' . DIRECTORY_SEPARATOR);
-define('QBOX_SDK_DIR', LIB_DIR . '3rd' . DIRECTORY_SEPARATOR . 'qiniu' . DIRECTORY_SEPARATOR . 'qbox' . DIRECTORY_SEPARATOR);
+define('QBOX_SDK_DIR', LIB_DIR . 'qiniu' . DIRECTORY_SEPARATOR . 'qbox' . DIRECTORY_SEPARATOR);
 
 /**
  * 加载配置文件
