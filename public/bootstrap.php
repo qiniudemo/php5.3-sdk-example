@@ -18,7 +18,7 @@ date_default_timezone_set('Asia/Shanghai');
  */
 define('ROOT_DIR', str_replace(array('\\\\', '//'), DIRECTORY_SEPARATOR, dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
 define('LIB_DIR', ROOT_DIR . 'lib' . DIRECTORY_SEPARATOR);
-define('QBOX_SDK_DIR', LIB_DIR . '3rd' . DIRECTORY_SEPARATOR . 'qiniu' . DIRECTORY_SEPARATOR . 'qbox' . DIRECTORY_SEPARATOR);
+define('QBOX_SDK_DIR', LIB_DIR . 'qiniu' . DIRECTORY_SEPARATOR . 'qbox' . DIRECTORY_SEPARATOR);
 
 /**
  * 加载配置文件
@@ -44,7 +44,7 @@ $db = Core_Db::getInstance($config["db"]);
 /**
  * 配置七牛云存储密钥信息
  */
-$QBOX_SECRET_KEY = $config["qbox"]["access_key"];
+$QBOX_ACCESS_KEY = $config["qbox"]["access_key"];
 $QBOX_SECRET_KEY = $config["qbox"]["secret_key"];
 
 /**
@@ -55,5 +55,5 @@ $client = QBox\OAuth2\NewClient();
 /**
  * 初始化 Qbox Reource Service Transport
  */
-$bucket = $config["qbox"]["tb_name"];
+$bucket = $config["qbox"]["bucket"];
 $rs = QBox\RS\NewService($client, $bucket);
