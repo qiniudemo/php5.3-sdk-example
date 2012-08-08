@@ -28,6 +28,7 @@ require_once LIB_DIR . 'helper.php';
 require_once LIB_DIR . 'pdo.class.php';
 
 require_once QBOX_SDK_DIR . 'rs.php';
+require_once QBOX_SDK_DIR . 'wmrs.php';
 require_once QBOX_SDK_DIR . 'fileop.php';
 require_once QBOX_SDK_DIR . 'client/rs.php';
 
@@ -56,4 +57,7 @@ $client = QBox\OAuth2\NewClient();
  * 初始化 Qbox Reource Service Transport
  */
 $bucket = $config["qbox"]["bucket"];
+$img_bucket = $config["qbox"]["img_bucket"];
 $rs = QBox\RS\NewService($client, $bucket);
+$img_rs = QBox\RS\NewService($client, $img_bucket);
+$wmrs  = QBox\WMRS\NewService($client);

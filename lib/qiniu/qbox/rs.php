@@ -39,7 +39,7 @@ class Service
 			$mimeType = 'application/octet-stream';
 		}
 		$entryURI = $this->TableName . ':' . $key;
-		$url = QBOX_IO_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
+		$url = QBOX_UP_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
 		return \QBox\OAuth2\CallWithBinary($this->Conn, $url, $fp, $bytes, $QBOX_PUT_TIMEOUT);
 	}
 
@@ -189,6 +189,33 @@ class Service
         $newurl = $source_url . '?' . $opWithParams . $saveAsParam;
         return \QBox\OAuth2\Call($this->Conn, $newurl);
     }
+    
+    /**
+     * 对bucket 设置保护，使其资源不能被直接访问
+     */
+    public function setProtected($protectedMode){
+    	$url = QBOX_PU_HOST . "/accessMode/" . $this->TableName . "/mode/" . $protectedMode;
+    	return \QBox\OAuth2\Call($this->Conn, $url);
+    }
+    
+    /**
+     * 设置分隔符
+     */
+    public function setSeparator($sep){
+    	$url = QBOX_PU_HOST . "/separator/" . $this->TableName . "/sep/" .\QBox\Encode($sep);
+    	return \QBox\OAuth2\Call($this->Conn, $url);
+    }
+    
+    public function setStyle($name, $style){
+    	$url = QBOX_PU_HOST . "/style/" . $this->TableName . "/name/" . \QBox\Encode($name) . "/style/" .\QBox\Encode($style);
+    	return \QBox\OAuth2\Call($this->Conn, $url);
+    }
+    
+    public function unsetStyle($name){
+    	$url = QBOX_PU_HOST . "/unstyle/" . $this->TableName . "/name/" . \QBox\Encode($name);
+    	return \QBox\OAuth2\Call($this->Conn, $url);
+    }
+    
 }
 
 /**
