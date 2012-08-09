@@ -18,6 +18,8 @@ $uid = $_COOKIE["uid"];
 $userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
 $username = $userinfo["username"];
 
+$wmstyles = $db->getAll("SELECT * FROM wmstyles WHERE user_id='$uid'");
+
 if (isset($_GET["id"])) {
     $id = trim($_GET["id"]);
     $fileRow = $db->getOne("SELECT id, file_key, file_name, file_size, created_at FROM uploads WHERE id='$id' LIMIT 1");
@@ -43,6 +45,14 @@ if (isset($_GET["id"])) {
 <title>相册 - 浏览图片</title>
 </head>
 <body>
+<script type="text/javascript" src="assets/js/jquery.js"></script>
+<script type="text/javascript">
+function styleSwitch(alt, src) {
+    $("#imgStyle").attr("alt", alt);
+    $("#imgStyle").attr("title", alt);
+    $("#imgStyle").attr("src", src);
+}
+</script>
 
 <p>欢迎您，<?php echo $username; ?></p>
 <h4>
@@ -58,6 +68,26 @@ if ($previewURL) {
 <p>文件名：<?php echo $fileRow["file_name"]; ?></p>
 <p>文件大小：<?php echo parse_bytes($fileRow["file_size"]); ?></p>
 <p>上传时间：<?php echo date("Y-m-d H:i:s", $fileRow["created_at"]); ?></p>
+
+
+<?php 
+$pubDomain = QBOX_IO_HOST . "/" . $config["qbox"]["bucket"];
+?>
+<p>
+	<img alt="" src="" id="imgStyle">
+</p>
+<?php if (!empty($wmstyles)):?>
+<p>已有预览风格：</p>
+<p>
+<?php foreach ($wmstyles as $wmstyle):?>
+	<a onclick="styleSwitch('abc','<?php echo $pubDomain . "/" . $key . "_" . $wmstyle['style']?>');"  href="javascript:void(0);"><?php echo $wmstyle['style']?></a>
+<?php endforeach;?>
+</p>
+<?php else:?>
+<p>还没有预览风格，去添加吧！</p>
+<?php endif;?>
+
+
 <p>
   <a href="download.php?id=<?php echo $fileRow["id"]; ?>" title="点击下载原始尺图片">下载</a>
   <a href="delete.php?id=<?php echo $fileRow["id"]; ?>" title="点击将该图片删除">删除</a>

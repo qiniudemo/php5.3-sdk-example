@@ -57,7 +57,5 @@ $client = QBox\OAuth2\NewClient();
  * 初始化 Qbox Reource Service Transport
  */
 $bucket = $config["qbox"]["bucket"];
-$img_bucket = $config["qbox"]["img_bucket"];
 $rs = QBox\RS\NewService($client, $bucket);
-$img_rs = QBox\RS\NewService($client, $img_bucket);
 $wmrs  = QBox\WMRS\NewService($client);

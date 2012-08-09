@@ -18,33 +18,40 @@ $uid = $_COOKIE["uid"];
 $userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
 $username = $userinfo["username"];
 
-if (isset($_POST["wmstyle"]) && isset($_POST["width"]) && isset($_POST["height"])) {
+	error_log(print_r($_POST,true));
+	
+$wmstyle = trim($_POST["wmstyle"]);
+$width = trim($_POST["width"]);
+$height = trim($_POST["height"]);
+$format = trim($_POST["format"]);
+$quality = trim($_POST["quality"]);
+$sharpen = trim($_POST["sharpen"]);
+
+if (!empty($wmstyle) && !empty($width) && !empty($height)) {
 	
 	$param = "imageView/0";
-
-	if (!empty($_POST["wmstyle"])) {
-		$style = trim($_POST['wmstyle']);
+	
+	if (!empty($wmstyle)) {
+		$style = $wmstyle;
 	}
-	if (!empty($_POST["width"])) {
-		$param .= "/w/" . trim($_POST['width']);
+	if (!empty($width)) {
+		$param .= "/w/" . $width;
 	}
-	if (!empty($_POST["height"])) {
+	if (!empty($height)) {
 		$param .= "/h/" . trim($_POST['height']);
 	}	
-	if (isset($_POST["format"])&&!empty($_POST["format"])) {
-		$param .= "/format/" . trim($_POST['format']);
+	if (!empty($format)) {
+		$param .= "/format/" . $format;
 	}
-	if (isset($_POST["quality"])&&!empty($_POST["quality"])) {
-		$param .= "/q/" . trim($_POST['quality']);
+	if (!empty($quality)) {
+		$param .= "/q/" . $quality;
 	}
-	if (isset($_POST["sharpen"])&&!empty($_POST["sharpen"])) {
-		$param .= "/sharpen/" . trim($_POST['sharpen']);
+	if (!empty($sharpen)) {
+		$param .= "/sharpen/" . $sharpen;
 	}
-	if (isset($_POST["watermark"])&&!empty($_POST["watermark"])) {
-		$param .= "/watermark/" . trim($_POST['watermark']);
+	if (isset($_POST["watermark"])) {
+		$param .= "/watermark/1";
 	}
-	
-	
 	
 	list($result, $code, $error) = $rs->setProtected(0);
 	if ($code != 200) {
@@ -92,26 +99,41 @@ if (isset($_POST["wmstyle"]) && isset($_POST["width"]) && isset($_POST["height"]
      <p>
       <label for="wmstyle">名称：</label>
       <input name="wmstyle" id="wmstyle" type="text" tabindex="1" />
+      <label>(必填。图片预览风格的名称)</label>
+     </p>
+     <p>      
       <label for="width">宽度：</label>
       <input name="width" id="width" type="text" tabindex="2" />
+      <label>(必填)</label>      
+     </p>
+     <p>      
       <label for="height">高度：</label>
-      <input name="height" id="height" type="text" tabindex="3" />
-    </p>
-    <p>
+      <input name="height" id="height"  type="text" tabindex="3" />
+      <label>(必填)</label>      
+     </p>
+     <p>
       <label for="format">格式：</label>
-      <input name="format" id="format" type="text" tabindex="4" />
+      <input name="format" id="format" value="jpg" type="text" tabindex="4" />
+      <label>(可选。包含jpg,png等图片格式)</label>      
+     </p>
+     <p>      
       <label for="quality">品质：</label>
-      <input name="quality" id="quality" type="text" tabindex="5" />
+      <input name="quality" id="quality" value="80" type="text" tabindex="5" />
+      <label>(可选。范围为：0-100)</label>      
+     </p>
+     <p>      
       <label for="sharpen">锐度：</label>
       <input name="sharpen" id="sharpen" type="text" tabindex="6" />
-    </p>
-    <p>
+      <label>(可选)</label>
+     </p>
+     <p>
       <label for="watermark">水印：</label>
-      <input name="watermark" id="watermark" type="text" tabindex="7" />
-    </p>
-    <p>
+      <input name="watermark" id="watermark" type="checkbox" tabindex="7" />
+      <label>(可选，是否要给该预览风格加水印)</label>      
+     </p>
+     <p>
       <input name="submit" type="submit" value="保存" tabindex="9" />
-    </p>
+     </p>
   </fieldset>
 </form>
 

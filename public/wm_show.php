@@ -51,10 +51,6 @@ function styleSwitch(alt, src) {
     $("#imgStyle").attr("title", alt);
     $("#imgStyle").attr("src", src);
 }
-function ale(){
-	alert("feng");	
-}
-
 </script>
 <p>欢迎您，<?php echo $username; ?></p>
 <h4>
@@ -66,25 +62,22 @@ function ale(){
 <?php 
 $pubDomain = QBOX_IO_HOST . "/" . $config["qbox"]["bucket"];
 ?>
-
 <p>
 	<img alt="" src="" id="imgStyle">
 </p>
-
 <?php if (!empty($wmstyles)):?>
-<p>已有水印风格：</p>
+<p>已有预览风格：</p>
 <p>
 <?php foreach ($wmstyles as $wmstyle):?>
 	<a onclick="styleSwitch('abc','<?php echo $pubDomain . "/" . $key . "_" . $wmstyle['style']?>');"  href="javascript:void(0);"><?php echo $wmstyle['style']?></a>
 <?php endforeach;?>
 </p>
 <?php else:?>
-<p>还没有水印风格，去添加吧！</p>
+<p>还没有预览风格，去添加吧！</p>
 <?php endif;?>
 
-
 <p>
-<a href="wm_style_setting.php">去添加水印风格</a>
+<a href="wm_style_setting.php">去添加预览风格</a>
 <a href="wm_tpl_setting.php">去添加水印模板</a>
 </p>
 
