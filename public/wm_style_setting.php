@@ -18,65 +18,66 @@ $uid = $_COOKIE["uid"];
 $userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
 $username = $userinfo["username"];
 
-	error_log(print_r($_POST,true));
-	
-$wmstyle = trim($_POST["wmstyle"]);
-$width = trim($_POST["width"]);
-$height = trim($_POST["height"]);
-$format = trim($_POST["format"]);
-$quality = trim($_POST["quality"]);
-$sharpen = trim($_POST["sharpen"]);
 
-if (!empty($wmstyle) && !empty($width) && !empty($height)) {
+if (isset($_POST['wmstyle']) && isset($_POST['width']) && isset($_POST['height'])) {
+	$wmstyle = trim($_POST["wmstyle"]);
+	$width = trim($_POST["width"]);
+	$height = trim($_POST["height"]);
+	$format = trim($_POST["format"]);
+	$quality = trim($_POST["quality"]);
+	$sharpen = trim($_POST["sharpen"]);
 	
-	$param = "imageView/0";
+	if (!empty($wmstyle) && !empty($width) && !empty($height)) {
 	
-	if (!empty($wmstyle)) {
-		$style = $wmstyle;
-	}
-	if (!empty($width)) {
-		$param .= "/w/" . $width;
-	}
-	if (!empty($height)) {
-		$param .= "/h/" . trim($_POST['height']);
-	}	
-	if (!empty($format)) {
-		$param .= "/format/" . $format;
-	}
-	if (!empty($quality)) {
-		$param .= "/q/" . $quality;
-	}
-	if (!empty($sharpen)) {
-		$param .= "/sharpen/" . $sharpen;
-	}
-	if (isset($_POST["watermark"])) {
-		$param .= "/watermark/1";
-	}
+		$param = "imageView/0";
 	
-	list($result, $code, $error) = $rs->setProtected(0);
-	if ($code != 200) {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "set Protected code failed: $code - $msg\n";
-	}
+		if (!empty($wmstyle)) {
+			$style = $wmstyle;
+		}
+		if (!empty($width)) {
+			$param .= "/w/" . $width;
+		}
+		if (!empty($height)) {
+			$param .= "/h/" . trim($_POST['height']);
+		}
+		if (!empty($format)) {
+			$param .= "/format/" . $format;
+		}
+		if (!empty($quality)) {
+			$param .= "/q/" . $quality;
+		}
+		if (!empty($sharpen)) {
+			$param .= "/sharpen/" . $sharpen;
+		}
+		if (isset($_POST["watermark"])) {
+			$param .= "/watermark/1";
+		}
 	
-	list($result, $code, $error) = $rs->setSeparator("_");
-	if ($code == 200) {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "set Separator failed: $code - $msg\n";
-	}
+		list($result, $code, $error) = $rs->setProtected(0);
+		if ($code != 200) {
+			$msg = QBox\ErrorMessage($code, $error);
+			echo "set Protected code failed: $code - $msg\n";
+		}
+	
+		list($result, $code, $error) = $rs->setSeparator("_");
+		if ($code == 200) {
+			$msg = QBox\ErrorMessage($code, $error);
+			echo "set Separator failed: $code - $msg\n";
+		}
+	
+		list($result, $code, $error) = $rs->setStyle($style, $param);
+		if ($code == 200) {
+			$sql = "INSERT INTO `wmstyles`(`user_id`, `style`, `value`)
+			VALUES ('$uid', '$style', '$param')";
+			$db->insert($sql);
+			header("Location: index.php");
+		} else {
+			$msg = QBox\ErrorMessage($code, $error);
+			echo "set samll.jpg Style failed: $code - $msg\n";
+		}
+	}		
+}	
 
-	list($result, $code, $error) = $rs->setStyle($style, $param);
-	if ($code == 200) {
-		$sql = "INSERT INTO `wmstyles`(`user_id`, `style`, `value`)
-			 VALUES ('$uid', '$style', '$param')";	
-		$db->insert($sql);
-   		header("Location: index.php");
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "set samll.jpg Style failed: $code - $msg\n";
-	}
-	
-}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" >

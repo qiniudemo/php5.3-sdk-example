@@ -28,7 +28,7 @@ require_once LIB_DIR . 'helper.php';
 require_once LIB_DIR . 'pdo.class.php';
 
 require_once QBOX_SDK_DIR . 'rs.php';
-require_once QBOX_SDK_DIR . 'wmrs.php';
+require_once QBOX_SDK_DIR . 'eu.php';
 require_once QBOX_SDK_DIR . 'fileop.php';
 require_once QBOX_SDK_DIR . 'client/rs.php';
 
@@ -58,4 +58,4 @@ $client = QBox\OAuth2\NewClient();
  */
 $bucket = $config["qbox"]["bucket"];
 $rs = QBox\RS\NewService($client, $bucket);
-$wmrs  = QBox\WMRS\NewService($client);
+$wmrs  = QBox\EU\NewService($client);

@@ -27,12 +27,6 @@ $config = array(
     ),
 
     # qiniu account
-/*    'qbox' => array(
-        'access_key' => 'bE21M6FW9V7zAFrBY5psgKOKJQLiBj12qMWTpc57',
-        'secret_key' => 'uMo7Nyq_eDK_CuQ8_FYCxoTHQZqjiaPh-cbiKO7L',  		
-        'bucket'     => 'photo360_albums',
-    ),*/
-
 	'qbox' => array(
 			'access_key' => 'RLT1NBD08g3kih5-0v8Yi6nX6cBhesa2Dju4P7mT',
 			'secret_key' => 'k6uZoSDAdKBXQcNYG3UOm4bP3spDVkTg-9hWHIKm',

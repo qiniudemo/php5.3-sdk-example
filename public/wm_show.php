@@ -69,7 +69,7 @@ $pubDomain = QBOX_IO_HOST . "/" . $config["qbox"]["bucket"];
 <p>已有预览风格：</p>
 <p>
 <?php foreach ($wmstyles as $wmstyle):?>
-	<a onclick="styleSwitch('abc','<?php echo $pubDomain . "/" . $key . "_" . $wmstyle['style']?>');"  href="javascript:void(0);"><?php echo $wmstyle['style']?></a>
+	<a onclick="styleSwitch('pic','<?php echo $pubDomain . "/" . $key . "_" . $wmstyle['style']?>');"  href="javascript:void(0);"><?php echo $wmstyle['style']?></a>
 <?php endforeach;?>
 </p>
 <?php else:?>

@@ -37,6 +37,7 @@ SDK样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://gi
 - [获取指定规格的缩略图地址](#fo-imagePreview)
 - [高级图像处理（缩略、裁剪、旋转、转化）](#ImageMogrifyPreviewURL)
 - [高级图像处理（缩略、裁剪、旋转、转化）并持久化](#ImageMogrifyAs)
+- [高级图像处理（水印）](#watermark)
 
 **SDK使用案例**
 
@@ -687,7 +688,6 @@ $mogrify_options
 在上述示例代码中，我们实例化了一个新的 `$imgrs` 对象，之所以这么做是因为我们考虑到缩略图也许可以创建公开外链，即缩略图所存放的 `thumbnails_bucket` 可以通过调用 `$imgrs->Publish()` 方法公开从而提供静态链接直接访问，这样做的好处是限定了作用域仅限于 `thumbnails_bucket`，也使得缩略图不必通过API通道进行请求且使用静态CDN加速访问，同时也保证了原图不受任何操作影响。
 
 为了使得调用 `$imgrs->ImageMogrifyAs()` 方法有实际意义，客户方的业务服务器必须保存 `thumbnails_bucket` 和 `$imgrs.ImageMogrifyAs` 方法中参数 `$target_key` 的值。如此，该缩略图作为一个新文件可以使用 SDK 提供的任何方法。
-
 
 
 ## SDK使用案例

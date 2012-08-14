@@ -18,56 +18,61 @@ $uid = $_COOKIE["uid"];
 $userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
 $username = $userinfo["username"];
 
-$text = trim($_POST["text"]);
-$dx = trim($_POST["dx"]);
-$dy = trim($_POST["dy"]);
-$font = trim($_POST["font"]);
-$fill = trim($_POST["fill"]);
-$bucket = trim($_POST["bucket"]);
-$gravity = trim($_POST["gravity"]);
-$dissolve = trim($_POST["dissolve"]);
-$pointsize = trim($_POST["pointsize"]);
-
-if (!empty($text)) {
+if (isset($_POST['text']))
+{
+	$text = trim($_POST["text"]);
+	$dx = trim($_POST["dx"]);
+	$dy = trim($_POST["dy"]);
+	$font = trim($_POST["font"]);
+	$fill = trim($_POST["fill"]);
+	$bucket = trim($_POST["bucket"]);
+	$gravity = trim($_POST["gravity"]);
+	$dissolve = trim($_POST["dissolve"]);
+	$pointsize = trim($_POST["pointsize"]);
 	
-	$param = array();
-
+	error_log(print_r($_POST, true));
+	
 	if (!empty($text)) {
-		$param['text'] = $text;
-	}
-	if (!empty($dx)) {
-		$param['dx'] = $dx;
-	}
-	if (!empty($dy)) {
-		$param['dy'] = $dy;
-	}	
-	if (!empty($font)) {
-		$param['font'] = $font;
-	}
-	if (!empty($fill)) {
-		$param['fill'] = $fill;
-	}
-	if (!empty($bucket)) {
-		$param['bucket'] = $bucket;
-	}
-	if (!empty($gravity)) {
-		$param['gravity'] = $gravity;
-	}
-	if (!empty($dissolve)) {
-		$param['dissolve'] = $dissolve;
-	}	
 	
-	if (!empty($pointsize)) {
-		$param['pointsize'] = $pointsize;
-	}
+		$param = array();
 	
-	list($result, $code, $error) = $wmrs->set('', $param);
+		if (!empty($text)) {
+			$param['text'] = $text;
+		}
+		if (!empty($dx)) {
+			$param['dx'] = $dx;
+		}
+		if (!empty($dy)) {
+			$param['dy'] = $dy;
+		}
+		if (!empty($font)) {
+			$param['font'] = $font;
+		}
+		if (!empty($fill)) {
+			$param['fill'] = $fill;
+		}
+		if (!empty($bucket)) {
+			$param['bucket'] = $bucket;
+		}
+		if (!empty($gravity)) {
+			$param['gravity'] = $gravity;
+		}
+		if (!empty($dissolve)) {
+			$param['dissolve'] = $dissolve;
+		}
 	
-	if ($code == 200) {
-		header("Location: index.php");
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "set default watermark failed: $code - $msg\n";
+		if (!empty($pointsize)) {
+			$param['pointsize'] = $pointsize;
+		}
+	
+		list($result, $code, $error) = $wmrs->SetWatermark('', $param);
+	
+		if ($code == 200) {
+			header("Location: index.php");
+		} else {
+			$msg = QBox\ErrorMessage($code, $error);
+			echo "set default watermark failed: $code - $msg\n";
+		}
 	}
 }
 ?>
