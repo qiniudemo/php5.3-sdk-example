@@ -84,7 +84,7 @@ $pubDomain = QBOX_IO_HOST . "/" . $config["qbox"]["bucket"];
 <?php endforeach;?>
 </p>
 <?php else:?>
-<p>还没有预览风格，去添加吧！</p>
+<p>还没有预览风格!<a href = "wm_show.php">去添加?</a>  </p>
 <?php endif;?>
 
 

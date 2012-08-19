@@ -18,6 +18,8 @@ function MakeAuthToken(array $params)
 
 	$params['deadline'] = time() + $expiresIn;
 	$signature = \QBox\Encode(json_encode($params));
+	unset($params['deadline']);
+	$params['expiresIn'] = $expiresIn;
 
 	$digest = hash_hmac('sha1', $signature, $QBOX_SECRET_KEY, true);
 	$encoded_digest = \QBox\Encode($digest);

@@ -30,7 +30,6 @@ if (isset($_POST['text']))
 	$dissolve = trim($_POST["dissolve"]);
 	$pointsize = trim($_POST["pointsize"]);
 	
-	error_log(print_r($_POST, true));
 	
 	if (!empty($text)) {
 	
@@ -65,7 +64,7 @@ if (isset($_POST['text']))
 			$param['pointsize'] = $pointsize;
 		}
 	
-		list($result, $code, $error) = $wmrs->SetWatermark('', $param);
+		list($code, $result) = $wmrs->SetWatermark('', $param);
 	
 		if ($code == 200) {
 			header("Location: index.php");
@@ -102,12 +101,12 @@ if (isset($_POST['text']))
      <p>      
       <label for="dx">横向边距：</label>
       <input name="dx" id="dx" type="text" tabindex="7" />
-      <label>(可选，默认值为10。)</label>
+      <label>(可选，缺省值为10。)</label>
      </p>
      <p>      
       <label for="dy">纵向边距：</label>
       <input name="dy" id="dy" type="text" tabindex="7" /> 
-      <label>(可选，默认值为10。)</label>           
+      <label>(可选，缺省值为10。)</label>           
    	 </p>    
    	 <p>
       <label for="pointsize">字体大小：</label>
@@ -132,7 +131,7 @@ if (isset($_POST['text']))
      <p>      
       <label for="gravity">位置：</label>
       <input name="gravity" id="gravity" type="text" tabindex="6" />
-      <label>(可选，字符串，默认为左上角（NorthWest）)</label>
+      <label>(可选，字符串，缺省值为右下角（SouthEast）)</label>
    	 </p>
      <p>      
       <label for="dissolve">透明度 ：</label>

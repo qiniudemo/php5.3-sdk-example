@@ -3,8 +3,6 @@
 namespace QBox\EU;
 
 require_once('oauth.php');
-require_once('utils.php');
-require_once('fileop.php');
 
 /**
  * End-user Settings Service
@@ -27,7 +25,7 @@ class Service {
 	public function SetWatermark($customer, array $tpl) {
 		$url = QBOX_EU_HOST . '/wmset';
 		$tpl['customer'] = $customer;
-		$ret = \QBox\OAuth2\CallWithParams($this->Conn, $url, $tpl);
+		$ret = \QBox\OAuth2\CallWithParamsNoRet($this->Conn, $url, $tpl);
 		unset($tpl['customer']);
 		return $ret;
 	}
