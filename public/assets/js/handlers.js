@@ -84,7 +84,7 @@ function uploadStart(file) {
                 // 首先，为该文件生成一个唯一ID
                 // uniqid() 函数在 public/assets/js/uniqid.js 文件中有定义
                 var fileUniqKey = uniqid(file.name);
-
+                
                 // 然后构造 action 表单域的值
                 // generate_rs_put_path() 在 public/assets/js/helper.js 中有定义
                 var action = generate_rs_put_path($bucket, fileUniqKey, file.type);
@@ -94,8 +94,11 @@ function uploadStart(file) {
 
                 // 给隐形表单添加名为 params 的 input 域（字段）
                 // params 里边的数据，用于文件上传成功后，七牛云存储服务器向我们的业务服务器执行 POST 回调
-                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type);
-
+                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type+"&auth="+$upToken+"&file=@"+file);
+                
+                // 给隐形表单添加 名为 auth 的 input 域 （字段）
+                this.addPostParam("auth", $upToken);
+                
                 // 将该文件唯一ID临时保存起来供后续使用
                 this.customSettings.fileUniqIdMapping[file.id] = fileUniqKey;
 	}

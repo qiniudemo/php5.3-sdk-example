@@ -79,6 +79,7 @@ function ExecuteRequest(
 	$ch = curl_init();
 	curl_setopt_array($ch, $curl_options);
 	$result = curl_exec($ch);
+	//var_dump($result);
 	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	$content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
 	curl_close($ch);

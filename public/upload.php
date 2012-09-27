@@ -37,6 +37,7 @@ if ($code == 200) {
 <title>相册 - 上传图片</title>
 <script type="text/javascript">
     var $bucket = '<?php echo $bucket; ?>';
+    var $upToken = '<?php echo $upToken;?>';
 </script>
 <link href="assets/css/default.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="assets/js/jquery.js"></script>
@@ -56,7 +57,7 @@ if ($code == 200) {
     window.onload = function() {
         var settings = {
             flash_url : "assets/swfupload/swfupload.swf",
-            upload_url: "<?php echo $upload_url; ?>",
+            upload_url:  "<?php echo QBOX_UP_HOST . "/upload"; ?>",
             post_params: {},
             use_query_string: false,
             file_post_name: "file",
