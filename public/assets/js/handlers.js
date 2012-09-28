@@ -94,7 +94,7 @@ function uploadStart(file) {
 
                 // 给隐形表单添加名为 params 的 input 域（字段）
                 // params 里边的数据，用于文件上传成功后，七牛云存储服务器向我们的业务服务器执行 POST 回调
-                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type+"&auth="+$upToken+"&file=@"+file);
+                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type);
                 
                 // 给隐形表单添加 名为 auth 的 input 域 （字段）
                 this.addPostParam("auth", $upToken);
