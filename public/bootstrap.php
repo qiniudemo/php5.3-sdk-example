@@ -30,6 +30,7 @@ require_once LIB_DIR . 'pdo.class.php';
 require_once QBOX_SDK_DIR . 'rs.php';
 require_once QBOX_SDK_DIR . 'fileop.php';
 require_once QBOX_SDK_DIR . 'client/rs.php';
+require_once QBOX_SDK_DIR . 'authtoken.php';
 
 /**
  * 设置错误报告级别
@@ -57,3 +58,4 @@ $client = QBox\OAuth2\NewClient();
  */
 $bucket = $config["qbox"]["bucket"];
 $rs = QBox\RS\NewService($client, $bucket);
+$upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));

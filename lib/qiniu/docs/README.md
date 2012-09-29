@@ -19,9 +19,9 @@ SDK样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://gi
 
 - [新建资源表](#rs-NewService)
 - [上传文件](#rs-PutFile)
+	- [获取用于上传文件的临时授权凭证](#generate-upload-token)
     - [服务端上传流程](#upload-server-side)
     - [客户端上传流程](#upload-client-side)
-        - [获取上传授权](#rs-PutAuth)
 - [获取已上传文件信息](#rs-Stat)
 - [下载文件](#rs-Get)
 - [下载文件（断点续传）](#rs-GetIfNotModified)
@@ -97,86 +97,91 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 ### 2. 上传文件
 
+<a name="generate-upload-token"></a>
+
+#### 2.1 获取用于上传文件的临时授权凭证
+要上传一个文件，首先需要调用 SDK 提供的 `QBox\MakeAuthToken()` 函数来获取一个经过授权用于临时匿名上传的 `upload_token`——经过数字签名的一组数据信息，该 `upload_token` 作为文件上传流中 `multipart/form-data` 的一部分进行传输。
+规格  
+
+	MakeAuthToken($params)
+	
+**参数**
+
+$params 
+:必须， 数组(Array)
+`$params`的具体规格如下
+
+	$params = array(
+		scope => <TargetBucket>, 
+		expires_in=> <ExpiresInSeconds>,
+		callback_url => <CallbackUrl>,
+		callback_body_type => <CallbackBodyType>,
+		customer => <EndUserId>
+	)
+
+:scope
+: 必须，字符串类型（String），设定文件要上传到的目标 `bucket`
+
+:expires_in
+: 可选，数字类型，用于设置上传 URL 的有效期，单位：秒，缺省为 3600 秒，即 1 小时后该上传链接不再有效（但该上传URL在其生成之后的59分59秒都是可用的）。
+
+:callback_url
+: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端要回调客户方的业务服务器地址。
+
+:callback_body_type
+: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端向客户方的业务服务器发送回调请求的 `Content-Type`。
+
+:customer
+: 可选，字符串类型（String），客户方终端用户（End User）的ID，该字段可以用来标示一个文件的属主，这在一些特殊场景下（比如给终端用户上传的图片打上名字水印）非常有用。
+
+**返回值**
+
+返回一个字符串类型（String）的用于上传文件用的临时授权 `upload_token`。
+
 <a name="upload-server-side"></a>
 
-#### 2.1 服务端上传流程
+#### 2.2 服务端上传流程
 
-以PHP程序作为服务端，向七牛云存储直传文件，只需调用资源表对象（`$rs`）的 `PutFile()` 方法，示例代码如下：
+以PHP程序作为服务端，向七牛云存储直传文件，`QBox\RS\UploadFile()` 方法，示例代码如下：
 
-    require('qboxsdk/rs.php');
-
-    /**
-     * 实例化资源表对象
-     */
-    $client = QBox\OAuth2\NewClient();
-    $bucket = 'CustomTableName';
-    $rs = QBox\RS\NewService($client, $bucket);
+	require('authtoken.php');
+	require('client/rs.php');
 
     /**
      * 服务端直传文件
      */
-    list($result, $code, $error) = $rs->PutFile(
-        $fileKey,         // 文件ID，必须
-        $mimeType,        // 文件 MIME 类型，必须
-        $localFile,       // 文件路径，必须
-        $fileSize,        // 文件大小，单位Byte
-        $timeout,         // 上传超时时间
-    );
-    echo "===> PutFile $key result:\n";
-    if ($code == 200) {
-        var_dump($result);
-    } else {
-        $msg = QBox\ErrorMessage($code, $error);
-        die("PutFile failed: $code - $msg\n");
-    }
+    $upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
+	list($result, $code, $error) = QBox\RS\UploadFile(
+		$upToken, 		//用于上传文件的临时授权凭证
+		$bucket,  		//该文件上传到的“资源表”
+		$key,	  		//该文件在“资源表”中的唯一标识
+		'',		  		//可选，文件的 mime-type 值。
+		__FILE__, 		//本地文件可被读取的有效路径
+		'CustomData', 	//为文件添加备注信息。
+		array('key' => $key) //文件上传成功后，七牛云存储向客户方业务服务器发送的回调参数。
+	);
+	echo time() . " ===> PutFile $key result:\n";
+	if ($code == 200) {
+		var_dump($result);
+	} else {
+		$msg = QBox\ErrorMessage($code, $error);
+		echo "PutFile failed: $code - $msg\n";
+		exit(-1);
+	}
 
 <a name="upload-client-side"></a>
 
-#### 2.2 客户端上传流程
+#### 2.3 客户端上传流程
 
-然而，大多数时候，我们并不期望用PHP来上传文件。例如我们用PHP脚本来编写一个网站，倘若要给网站的用户提供文件上传的功能，自然是希望用户将文件在他的浏览器直接上传至七牛的云存储。如果我们的网站还有手机客户端应用也需要上传文件或照片，自然也是希望用户直接在他们的移动端上传至云端的存储服务器。
 
-正如你想到的那样，应该将服务端的上传授权和客户端的直传分离开来，服务端PHP程序负责从七牛云存储获取授权的上传URL，然后将该授权的上传地址返回给客户端（可以是浏览器也可以是移动App），然后客户端程序再使用PutFile这样的思路进行端到七牛云存储的文件直接传输。
+客户端上传流程和服务端上传类似，差别在于：客户端直传文件所需的 `upload_token` 可以选择在客户方的业务服务器端生成，也可以选择在客户方的客户端程序里边生成。选择前者，可以和客户方的业务揉合得更紧密和安全些，比如防伪造请求。
 
-一旦理解，解决方案是水到渠成的。要实现这样的上传模型并不难，在我们的PHP网站后端我们可以用PHP SDK提供的PutAuth()方法获取授权URL，在浏览器网页上，我们可以直接使用七牛云存储接口实现直传，在手机客户端，如果是Android程序可以调用QBoxJavaSDK提供的类PutFile方法实现，要是iOS应用也可以使用QBoxObjCSDK提供的类PutFile实现上传，如果是未找到适合其他移动端开发的SDK，那还有终极解决方案，直接遵循[七牛云存储文件上传接口协议](/v2/api/io/#rs-PutFile)实现一个类似PutFile的方法即可。
+简单来讲，客户端上传流程也分为两步：
 
-<a name="rs-PutAuth"></a>
+1. 获取 `upload_token`（[用于上传文件的临时授权凭证](#generate-upload-token)）
+2. 将该 `upload_token` 作为文件上传流 `multipart/form-data` 中的一部分实现上传操作
 
-**2.2.1 获取上传授权**
-
-所谓上传授权，就是获得一个可匿名直传的且离客户端应用程序最近的一个云存储节点的临时有效URL。
-
-要取得上传授权，只需调用已经实例化好的资源表对象的 PutAuth() 方法。实例代码如下：
-
-    require('qboxsdk/rs.php');
-    require('qboxsdk/client/rs.php');
-
-    ……
-
-    /**
-     * 新建资源表
-     */
-    $bucket = 'CustomTableName';
-    $rs = QBox\RS\NewService($client, $bucket);
-
-    ……
-
-    /**
-     * 调用资源表对象的 PutAuth() 方法
-     * 取得上传授权（生成一个短期有效的可匿名上传URL）
-     */
-    list($result, $code, $error) = $rs->PutAuth();
-    echo "===> PutAuth result:\n";
-    if ($code == 200) {
-        var_dump($result);
-    } else {
-        $msg = QBox\ErrorMessage($code, $error);
-        die("PutFile failed: $code - $msg\n");
-    }
-
-如果请求成功，$result 会包含 url 和 expires_in 两个字段。url 字段对应的值为匿名上传的临时URL，expires_in 对应的值则是该临时URL的有效期。
-
-一旦建立好资源表和取得上传授权，客户端程序就可以往这个URL开始上传文件了。
+如果您的网络程序是从云端（服务端程序）到终端（手持设备应用）的架构模型，且终端用户有使用您移动端App上传文件（比如照片或视频）的需求，可以把您服务器得到的此 `upload_token` 返回给手持设备端的App，然后您的移动 App 可以使用 [七牛云存储 Objective-SDK （iOS）](http://docs.qiniutek.com/v3/sdk/objc/) 或 [七牛云存储 Android-SDK](http://docs.qiniutek.com/v3/sdk/android/) 的相关上传函数或参照 [七牛云存储API之文件上传](http://docs.qiniutek.com/v3/api/io/#upload) 直传文件。这样，您的终端用户即可把数据（比如图片或视频）直接上传到七牛云存储服务器上无须经由您的服务端中转，而且在上传之前，七牛云存储做了智能加速，终端用户上传数据始终是离他物理距离最近的存储节点。当终端用户上传成功后，七牛云存储服务端会向您指定的 `callback_url` 发送回调数据。如果 `callback_url` 所在的服务处理完毕后输出 `JSON` 格式的数据，七牛云存储服务端会将该回调请求所得的响应信息原封不动地返回给终端应用程序。
 
 由于在网页向七牛云存储直接传输文件需要遵循[七牛云存储文件上传接口协议](/v2/api/io/#rs-PutFile)，而不仅仅是像调用SDK提供的PutFile()那么简单。所以，在本篇文档的最后，我们向您详细描述了该上传过程的具体实现，供您尽情查阅！
 
@@ -185,7 +190,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 <a name="rs-Stat"></a>
 
-### 4. 获取已上传文件信息
+### 3. 获取已上传文件信息
 
 您可以调用资源表对象的 Stat() 方法并传入一个 Key（类似ID）来获取指定文件的相关信息。
 
@@ -221,7 +226,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 <a name="rs-Get"></a>
 
-### 5. 下载文件
+### 4. 下载文件
 
 要下载一个文件，首先需要取得下载授权，所谓下载授权，就是取得一个临时合法有效的下载链接，只需调用资源表对象的 Get() 方法并传入相应的 文件ID 和下载要保存的文件名 作为参数即可。示例代码如下：
 
@@ -265,7 +270,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 <a name="rs-GetIfNotModified"></a>
 
-### 6. 下载文件（断点续传）
+### 5. 下载文件（断点续传）
 
 这里所说的断点续传指断点续下载，所谓断点续下载，就是已经下载的部分不用下载，只下载基于某个“游标”之后的那部分文件内容。相对于资源表对象的 Get() 方法，调用断点续下载方法 GetIfNotModified() 需额外再传入一个 $baseVersion 的参数（如result['hash']，result为需要续传的Get()的第一个返回值）作为下载的内容起点。示例代码如下：
 
@@ -313,7 +318,7 @@ GetIfNotModified() 方法返回的结果包含的字段同 Get() 方法一致。
 
 <a name="rs-BatchGet"></a>
 
-### 7. 下载文件（批量操作）
+### 6. 下载文件（批量操作）
 
 调用资源表对象的 BatchGet() 方法，可以传递多个文件ID同时获取多个短期有效的可用下载链接。
 
@@ -374,7 +379,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Publish"></a>
 
-### 8. 发布公开资源
+### 7. 发布公开资源
 
 使用七牛云存储提供的资源发布功能，您可以将一个资源表里边的所有文件以静态链接可访问的方式公开发布到您自己的域名下。
 
@@ -406,7 +411,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Unpublish"></a>
 
-### 9. 取消资源发布
+### 8. 取消资源发布
 
 调用资源表对象的 Unpublish() 方法可取消该资源表内所有文件的静态外链。
 
@@ -435,7 +440,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Delete"></a>
 
-### 10. 删除已上传的文件
+### 9. 删除已上传的文件
 
 要删除指定的文件，只需调用资源表对象的 Delete() 方法并传入 文件ID（key）作为参数即可。如下示例代码：
 
@@ -464,7 +469,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Drop"></a>
 
-### 11. 删除所有文件（单个“表”）
+### 10. 删除所有文件（单个“表”）
 
 要删除整个资源表及该表里边的所有文件，可以调用资源表对象的 Drop() 方法。
 

@@ -18,17 +18,6 @@ $uid = $_COOKIE["uid"];
 $userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
 $username = $userinfo["username"];
 
-/**
- * 获取临时上传地址
- */
-list($result, $code, $error) = $rs->PutAuth();
-if ($code == 200) {
-        $upload_url = $result["url"];
-} else {
-	echo "PutFile failed: $code - $error\n";
-	exit(-1);
-}
-
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" >
@@ -37,6 +26,7 @@ if ($code == 200) {
 <title>相册 - 上传图片</title>
 <script type="text/javascript">
     var $bucket = '<?php echo $bucket; ?>';
+    var $upToken = '<?php echo $upToken;?>';
 </script>
 <link href="assets/css/default.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="assets/js/jquery.js"></script>
@@ -56,7 +46,7 @@ if ($code == 200) {
     window.onload = function() {
         var settings = {
             flash_url : "assets/swfupload/swfupload.swf",
-            upload_url: "<?php echo $upload_url; ?>",
+            upload_url:  "<?php echo QBOX_UP_HOST . "/upload"; ?>",
             post_params: {},
             use_query_string: false,
             file_post_name: "file",
