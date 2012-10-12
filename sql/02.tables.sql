@@ -30,3 +30,13 @@ CREATE TABLE `uploads` (
         `created_at` INT( 13 ) UNSIGNED NOT NULL DEFAULT 0 COMMENT '上传时间' ,
         INDEX `index_uploads_on_user_id` ( `user_id` )
 ) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT='上传的文件信息表';
+
+--
+-- Table structure for table `wmstyles`
+--
+CREATE TABLE IF NOT EXISTS `wmstyles` (
+  `id` int(10) NOT NULL  AUTO_INCREMENT PRIMARY KEY ,
+  `user_id` int(10) NOT NULL COMMENT '关联的用户ID' ,
+  `style` varchar(128) NOT NULL COMMENT '图片预览风格的名字' ,
+  `value` varchar(128) NOT NULL  COMMENT '图片预览风格具体参数' 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  COMMENT '设置图片预览风格表' ;

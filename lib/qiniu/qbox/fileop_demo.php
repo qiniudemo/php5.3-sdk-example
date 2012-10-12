@@ -6,10 +6,19 @@ require_once('fileop.php');
 
 $client = QBox\OAuth2\NewClient();
 
-$tblName = 'tblName';
-$rs = QBox\RS\NewService($client, $tblName);
+$bucketName = 'bucketName';
+$rs = QBox\RS\NewService($client, $bucketName);
 
 $key = '2.jpg';
+
+list($code, $error) = $rs->Mkbucket($bucket);
+echo time() . " ===> Mkbucket result:\n";
+if ($code == 200) {
+	echo "Mkbucket Success!\n";
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "Buckets failed: $code - $msg\n";
+}
 
 list($result, $code, $error) = $rs->Get($key, $key);
 echo "===> Get $key result:\n";

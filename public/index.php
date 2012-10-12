@@ -50,8 +50,9 @@ foreach($fileRows as $row) {
     <td><a href="show.php?id=<?php echo $row["id"]; ?>" target="_blank" title="点击查看缩略图"><?php echo $row["file_name"]; ?></a></td>
     <td width="100" align="center"><?php echo parse_bytes($row["file_size"], 1024); ?></td>
     <td width="180" align="center"><?php echo date("Y-m-d H:i:s", $row["created_at"]); ?></td>
-    <td width="120" align="center">
+    <td width="160" align="center">
       <a href="show.php?id=<?php echo $row["id"]; ?>" target="_blank" title="点击查看缩略图">查看</a>
+      <a href="wm_show.php?id=<?php echo $row["id"]; ?>" title="点击进行水印设置">水印</a>
       <a href="download.php?id=<?php echo $row["id"]; ?>" title="点击下载原始尺图片">下载</a>
       <a href="delete.php?id=<?php echo $row["id"]; ?>" title="点击将该图片删除">删除</a>
     </td>

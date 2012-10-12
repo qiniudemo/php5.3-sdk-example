@@ -17,7 +17,6 @@ if (empty($_COOKIE["uid"]) || (int)$_COOKIE["uid"] < 1) {
 $uid = $_COOKIE["uid"];
 $userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
 $username = $userinfo["username"];
-
 $wmstyles = $db->getAll("SELECT * FROM wmstyles WHERE user_id='$uid'");
 
 if (isset($_GET["id"])) {
@@ -53,22 +52,12 @@ function styleSwitch(alt, src) {
     $("#imgStyle").attr("src", src);
 }
 </script>
-
 <p>欢迎您，<?php echo $username; ?></p>
 <h4>
   <a href="index.php">返回列表</a>
   <a href="upload.php">上传照片</a>
   <a href="logout.php">注销退出</a>
 </h4>
-
-<?php
-if ($previewURL) {
-?>
-
-<p>文件名：<?php echo $fileRow["file_name"]; ?></p>
-<p>文件大小：<?php echo parse_bytes($fileRow["file_size"]); ?></p>
-<p>上传时间：<?php echo date("Y-m-d H:i:s", $fileRow["created_at"]); ?></p>
-
 
 <?php 
 $pubDomain = QBOX_IO_HOST . "/" . $config["qbox"]["bucket"];
@@ -80,32 +69,20 @@ $pubDomain = QBOX_IO_HOST . "/" . $config["qbox"]["bucket"];
 <p>已有预览风格：</p>
 <p>
 <?php foreach ($wmstyles as $wmstyle):?>
-	<a onclick="styleSwitch('abc','<?php echo $pubDomain . "/" . $key . "_" . $wmstyle['style']?>');"  href="javascript:void(0);"><?php echo $wmstyle['style']?></a>
+	<a onclick="styleSwitch('pic','<?php echo $pubDomain . "/" . $key . "_" . $wmstyle['style']?>');"  href="javascript:void(0);"><?php echo $wmstyle['style']?></a>
 <?php endforeach;?>
 </p>
 <?php else:?>
-<p>还没有预览风格!<a href = "wm_show.php">去添加?</a>  </p>
+<p>还没有预览风格,点击以下链接去添加：</p>
 <?php endif;?>
 
+<p>
+<a href="wm_style_setting.php">去添加预览风格</a>
+</p>
 
 <p>
-  <a href="download.php?id=<?php echo $fileRow["id"]; ?>" title="点击下载原始尺图片">下载</a>
-  <a href="delete.php?id=<?php echo $fileRow["id"]; ?>" title="点击将该图片删除">删除</a>
+<a href="wm_tpl_setting.php">去添加水印模板</a>
 </p>
-<img src="<?php echo $previewURL; ?>" />
-
-<?php
-} else {
-?>
-
-<p>出错啦，请您稍后再试！</p>
-<br />
-<p>错误码：<?php echo $errnum; ?></p>
-<p>出错信息：<?php echo $errmsg; ?></p>
-
-<?php
-}
-?>
 
 <body>
 </html>

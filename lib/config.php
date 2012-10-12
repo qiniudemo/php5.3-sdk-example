@@ -27,10 +27,10 @@ $config = array(
     ),
 
     # qiniu account
-    'qbox' => array(
-        'access_key' => '<Please apply your access key>',
-        'secret_key' => '<Dont send your secret key to anyone>',
-        'bucket'     => 'photo360_albums',
-    ),
+	'qbox' => array(
+			'access_key' => 'RLT1NBD08g3kih5-0v8Yi6nX6cBhesa2Dju4P7mT',
+			'secret_key' => 'k6uZoSDAdKBXQcNYG3UOm4bP3spDVkTg-9hWHIKm',
+			'bucket'     => 'photo360_albums',
+	),		
 
 );

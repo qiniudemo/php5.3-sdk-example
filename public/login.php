@@ -10,6 +10,10 @@
 
 require_once 'bootstrap.php';
 
+
+
+
+
 if (isset($_POST["email"]) && isset($_POST["password"])) {
     $email = trim($_POST["email"]);
     $password = trim($_POST["password"]);
@@ -30,6 +34,10 @@ if (isset($_POST["email"]) && isset($_POST["password"])) {
             header("Location: index.php");
             exit;
         }
+        //publish the domain for later watermark
+        $domain = QBOX_IO_HOST;
+        $bucket = $config["qbox"]["bucket"];
+        $rs->Publish($domain."/".$bucket);
     } else {
         echo 'ERROR: Login Failed! username and password are not match!';
         exit(-1);
