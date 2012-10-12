@@ -5,7 +5,7 @@ define('QBOX_AUTHORIZATION_ENDPOINT', '<AuthURL>');
 define('QBOX_TOKEN_ENDPOINT',         'https://acc.qbox.me/oauth2/token');
 
 define('QBOX_IO_HOST', 'http://iovip.qbox.me');
-define('QBOX_UP_HOST', 'http://up.qbox.me');
+define('QBOX_UP_HOST', 'http://up.qbox.me:80');
 define('QBOX_RS_HOST', 'http://rs.qbox.me:10100');
 define('QBOX_PU_HOST', 'http://pu.qbox.me:10200');
 define('QBOX_EU_HOST', 'http://eu.qbox.me');

@@ -17,11 +17,13 @@ SDK样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://gi
 
 **云存储接口**
 
-- [新建资源表](#rs-NewService)
+- [Bucket (资源表) 管理](#Buckets)
+	- [新建 Bucket](#rs-Mkbucket)
+	- [列出所有 Bucket](#rs-Buckets)
 - [上传文件](#rs-PutFile)
+	- [获取用于上传文件的临时授权凭证](#generate-upload-token)
     - [服务端上传流程](#upload-server-side)
     - [客户端上传流程](#upload-client-side)
-        - [获取上传授权](#rs-PutAuth)
 - [获取已上传文件信息](#rs-Stat)
 - [下载文件](#rs-Get)
 - [下载文件（断点续传）](#rs-GetIfNotModified)
@@ -37,7 +39,6 @@ SDK样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://gi
 - [获取指定规格的缩略图地址](#fo-imagePreview)
 - [高级图像处理（缩略、裁剪、旋转、转化）](#ImageMogrifyPreviewURL)
 - [高级图像处理（缩略、裁剪、旋转、转化）并持久化](#ImageMogrifyAs)
-- [高级图像处理（水印）](#watermark)
 
 **SDK使用案例**
 
@@ -72,13 +73,17 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 ## 云存储接口
 
-<a name="rs-NewService"></a>
+<a name="Buckets"></a>
 
-### 1. 新建资源表
+### 1.Bucket (资源表) 管理
+
+<a name="rs-Mkbucket"></a>
+
+#### 1.1 新建 Bucket
 
 新建资源表的意义在于，您可以将所有上传的资源分布式加密存储在七牛云存储服务端后还能保持相应的完整映射索引。
 
-新建一份资源表，您只需在登录授权后实例化一个 QBox\RS\NewService() 即可，代码如下：
+要新建一份资源表，您需要在登录授权后实例化一个 `QBox\RS\NewService()`，然后用实例化对象去创建bucket。代码如下：
 
     require('qboxsdk/rs.php');
     require('qboxsdk/client/rs.php');
@@ -89,95 +94,130 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
     $client = QBox\OAuth2\NewClient();
 
     /**
-     * 然后，新建资源表只需在登录后实例化一个 QBox\RS\NewService() 对象即可
+     * 然后，需在登录后实例化一个 QBox\RS\NewService() 对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
-
+    
+    /**
+     *最后，通过该实例化对象把资源表建出来
+     */
+    list($code, $error) = $rs->Mkbucket($bucket); 
+    echo time() . " ===> Mkbucket result:\n";
+	if ($code == 200) {
+		echo "Mkbucket Success!\n";
+	} else {
+		$msg = QBox\ErrorMessage($code, $error);
+		echo "Buckets failed: $code - $msg\n";	
+	}
+	
+开发者也可以事先登录[开发者网站](https://dev.qiniutek.com/buckets/new)后创建一个空间名称(bucket)。
+	
+<a name="rs-Buckets"></a>
+#### 1.2 列出所有 Bucket
+要列出该用户的所有bucket只需要用上面实例化的 `QBox\RS\NewService()` 对象调用 `Mkbucket()`。示例代码如下：
+		
+	/**
+	 *返回的结果$result 包含该用户拥有的所有bucket 的数组
+	 */
+	list($result, $code, $error) = $rs->Buckets();
+	echo time() . " ===> Bucukets result:\n";
+	if ($code == 200) {
+		var_dump($result);
+	} else {
+		$msg = QBox\ErrorMessage($code, $error);
+		echo "Buckets failed: $code - $msg\n";	
+	}
+ 
 <a name="rs-PutFile"></a>
 
 ### 2. 上传文件
 
+<a name="generate-upload-token"></a>
+
+#### 2.1 获取用于上传文件的临时授权凭证
+要上传一个文件，首先需要调用 SDK 提供的 `QBox\MakeAuthToken()` 函数来获取一个经过授权用于临时匿名上传的 `upload_token`——经过数字签名的一组数据信息，该 `upload_token` 作为文件上传流中 `multipart/form-data` 的一部分进行传输。
+规格  
+
+	MakeAuthToken($params)
+	
+**参数**
+
+$params 
+:必须， 数组(Array)
+`$params`的具体规格如下
+
+	$params = array(
+		‘scope’ => <TargetBucket>, 
+		‘expiresIn’=> <ExpiresInSeconds>,
+		‘callbackUrl’ => <CallbackUrl>,
+		‘callbackBodyType’ => <CallbackBodyType>,
+		‘customer’ => <EndUserId>
+	)
+
+:scope
+: 必须，字符串类型（String），设定文件要上传到的目标 `bucket`
+
+:expiresIn
+: 可选，数字类型，用于设置上传 URL 的有效期，单位：秒，缺省为 3600 秒，即 1 小时后该上传链接不再有效（但该上传URL在其生成之后的59分59秒都是可用的）。
+
+:callbackUrl
+: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端要回调客户方的业务服务器地址。
+
+:callbackBodyType
+: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端向客户方的业务服务器发送回调请求的 `Content-Type`。
+
+:customer
+: 可选，字符串类型（String），客户方终端用户（End User）的ID，该字段可以用来标示一个文件的属主，这在一些特殊场景下（比如给终端用户上传的图片打上名字水印）非常有用。
+
+**返回值**
+
+返回一个字符串类型（String）的用于上传文件用的临时授权 `upload_token`。
+
 <a name="upload-server-side"></a>
 
-#### 2.1 服务端上传流程
+#### 2.2 服务端上传流程
 
-以PHP程序作为服务端，向七牛云存储直传文件，只需调用资源表对象（`$rs`）的 `PutFile()` 方法，示例代码如下：
+以PHP程序作为服务端，向七牛云存储直传文件，`QBox\RS\UploadFile()` 方法，示例代码如下：
 
-    require('qboxsdk/rs.php');
-
-    /**
-     * 实例化资源表对象
-     */
-    $client = QBox\OAuth2\NewClient();
-    $bucket = 'CustomTableName';
-    $rs = QBox\RS\NewService($client, $bucket);
+	require('authtoken.php');
+	require('client/rs.php');
 
     /**
      * 服务端直传文件
      */
-    list($result, $code, $error) = $rs->PutFile(
-        $fileKey,         // 文件ID，必须
-        $mimeType,        // 文件 MIME 类型，必须
-        $localFile,       // 文件路径，必须
-        $fileSize,        // 文件大小，单位Byte
-        $timeout,         // 上传超时时间
-    );
-    echo "===> PutFile $key result:\n";
-    if ($code == 200) {
-        var_dump($result);
-    } else {
-        $msg = QBox\ErrorMessage($code, $error);
-        die("PutFile failed: $code - $msg\n");
-    }
+    $upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
+	list($result, $code, $error) = QBox\RS\UploadFile(
+		$upToken, 		//用于上传文件的临时授权凭证
+		$bucket,  		//该文件上传到的“资源表”
+		$key,	  		//该文件在“资源表”中的唯一标识
+		'',		  		//可选，文件的 mime-type 值。
+		__FILE__, 		//本地文件可被读取的有效路径
+		'CustomData', 	//为文件添加备注信息。
+		array('key' => $key) //文件上传成功后，七牛云存储向客户方业务服务器发送的回调参数。
+	);
+	echo time() . " ===> PutFile $key result:\n";
+	if ($code == 200) {
+		var_dump($result);
+	} else {
+		$msg = QBox\ErrorMessage($code, $error);
+		echo "PutFile failed: $code - $msg\n";
+		exit(-1);
+	}
 
 <a name="upload-client-side"></a>
 
-#### 2.2 客户端上传流程
+#### 2.3 客户端上传流程
 
-然而，大多数时候，我们并不期望用PHP来上传文件。例如我们用PHP脚本来编写一个网站，倘若要给网站的用户提供文件上传的功能，自然是希望用户将文件在他的浏览器直接上传至七牛的云存储。如果我们的网站还有手机客户端应用也需要上传文件或照片，自然也是希望用户直接在他们的移动端上传至云端的存储服务器。
 
-正如你想到的那样，应该将服务端的上传授权和客户端的直传分离开来，服务端PHP程序负责从七牛云存储获取授权的上传URL，然后将该授权的上传地址返回给客户端（可以是浏览器也可以是移动App），然后客户端程序再使用PutFile这样的思路进行端到七牛云存储的文件直接传输。
+客户端上传流程和服务端上传类似，差别在于：客户端直传文件所需的 `upload_token` 可以选择在客户方的业务服务器端生成，也可以选择在客户方的客户端程序里边生成。选择前者，可以和客户方的业务揉合得更紧密和安全些，比如防伪造请求。
 
-一旦理解，解决方案是水到渠成的。要实现这样的上传模型并不难，在我们的PHP网站后端我们可以用PHP SDK提供的PutAuth()方法获取授权URL，在浏览器网页上，我们可以直接使用七牛云存储接口实现直传，在手机客户端，如果是Android程序可以调用QBoxJavaSDK提供的类PutFile方法实现，要是iOS应用也可以使用QBoxObjCSDK提供的类PutFile实现上传，如果是未找到适合其他移动端开发的SDK，那还有终极解决方案，直接遵循[七牛云存储文件上传接口协议](/v2/api/io/#rs-PutFile)实现一个类似PutFile的方法即可。
+简单来讲，客户端上传流程也分为两步：
 
-<a name="rs-PutAuth"></a>
+1. 获取 `upload_token`（[用于上传文件的临时授权凭证](#generate-upload-token)）
+2. 将该 `upload_token` 作为文件上传流 `multipart/form-data` 中的一部分实现上传操作
 
-**2.2.1 获取上传授权**
-
-所谓上传授权，就是获得一个可匿名直传的且离客户端应用程序最近的一个云存储节点的临时有效URL。
-
-要取得上传授权，只需调用已经实例化好的资源表对象的 PutAuth() 方法。实例代码如下：
-
-    require('qboxsdk/rs.php');
-    require('qboxsdk/client/rs.php');
-
-    ……
-
-    /**
-     * 新建资源表
-     */
-    $bucket = 'CustomTableName';
-    $rs = QBox\RS\NewService($client, $bucket);
-
-    ……
-
-    /**
-     * 调用资源表对象的 PutAuth() 方法
-     * 取得上传授权（生成一个短期有效的可匿名上传URL）
-     */
-    list($result, $code, $error) = $rs->PutAuth();
-    echo "===> PutAuth result:\n";
-    if ($code == 200) {
-        var_dump($result);
-    } else {
-        $msg = QBox\ErrorMessage($code, $error);
-        die("PutFile failed: $code - $msg\n");
-    }
-
-如果请求成功，$result 会包含 url 和 expires_in 两个字段。url 字段对应的值为匿名上传的临时URL，expires_in 对应的值则是该临时URL的有效期。
-
-一旦建立好资源表和取得上传授权，客户端程序就可以往这个URL开始上传文件了。
+如果您的网络程序是从云端（服务端程序）到终端（手持设备应用）的架构模型，且终端用户有使用您移动端App上传文件（比如照片或视频）的需求，可以把您服务器得到的此 `upload_token` 返回给手持设备端的App，然后您的移动 App 可以使用 [七牛云存储 Objective-SDK （iOS）](http://docs.qiniutek.com/v3/sdk/objc/) 或 [七牛云存储 Android-SDK](http://docs.qiniutek.com/v3/sdk/android/) 的相关上传函数或参照 [七牛云存储API之文件上传](http://docs.qiniutek.com/v3/api/io/#upload) 直传文件。这样，您的终端用户即可把数据（比如图片或视频）直接上传到七牛云存储服务器上无须经由您的服务端中转，而且在上传之前，七牛云存储做了智能加速，终端用户上传数据始终是离他物理距离最近的存储节点。当终端用户上传成功后，七牛云存储服务端会向您指定的 `callback_url` 发送回调数据。如果 `callback_url` 所在的服务处理完毕后输出 `JSON` 格式的数据，七牛云存储服务端会将该回调请求所得的响应信息原封不动地返回给终端应用程序。
 
 由于在网页向七牛云存储直接传输文件需要遵循[七牛云存储文件上传接口协议](/v2/api/io/#rs-PutFile)，而不仅仅是像调用SDK提供的PutFile()那么简单。所以，在本篇文档的最后，我们向您详细描述了该上传过程的具体实现，供您尽情查阅！
 
@@ -186,7 +226,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 <a name="rs-Stat"></a>
 
-### 4. 获取已上传文件信息
+### 3. 获取已上传文件信息
 
 您可以调用资源表对象的 Stat() 方法并传入一个 Key（类似ID）来获取指定文件的相关信息。
 
@@ -196,7 +236,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $fileKey = 'an_unique_key_also_can_be_a_file_name';
@@ -222,7 +262,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 <a name="rs-Get"></a>
 
-### 5. 下载文件
+### 4. 下载文件
 
 要下载一个文件，首先需要取得下载授权，所谓下载授权，就是取得一个临时合法有效的下载链接，只需调用资源表对象的 Get() 方法并传入相应的 文件ID 和下载要保存的文件名 作为参数即可。示例代码如下：
 
@@ -232,7 +272,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $fileKey = 'an_unique_key_also_can_be_a_file_name';
@@ -266,7 +306,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 <a name="rs-GetIfNotModified"></a>
 
-### 6. 下载文件（断点续传）
+### 5. 下载文件（断点续传）
 
 这里所说的断点续传指断点续下载，所谓断点续下载，就是已经下载的部分不用下载，只下载基于某个“游标”之后的那部分文件内容。相对于资源表对象的 Get() 方法，调用断点续下载方法 GetIfNotModified() 需额外再传入一个 $baseVersion 的参数（如result['hash']，result为需要续传的Get()的第一个返回值）作为下载的内容起点。示例代码如下：
 
@@ -276,7 +316,7 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $fileKey = 'an_unique_key_also_can_be_a_file_name';
@@ -314,7 +354,7 @@ GetIfNotModified() 方法返回的结果包含的字段同 Get() 方法一致。
 
 <a name="rs-BatchGet"></a>
 
-### 7. 下载文件（批量操作）
+### 6. 下载文件（批量操作）
 
 调用资源表对象的 BatchGet() 方法，可以传递多个文件ID同时获取多个短期有效的可用下载链接。
 
@@ -336,7 +376,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $key1 = 'an_unique_key_also_can_be_a_file_name';
@@ -375,7 +415,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Publish"></a>
 
-### 8. 发布公开资源
+### 7. 发布公开资源
 
 使用七牛云存储提供的资源发布功能，您可以将一个资源表里边的所有文件以静态链接可访问的方式公开发布到您自己的域名下。
 
@@ -387,13 +427,13 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $accessDomain = 'cdn.example.com';
 
     /**
-     * 将 CustomTableName 表里边的内容作为静态资源发布。
+     * 将 CustomBucketName 表里边的内容作为静态资源发布。
      * 静态资源访问的url格式为：http://$accessDomain/fileKey
      */
     list($code, $result) = $rs->Publish($accessDomain);
@@ -407,7 +447,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Unpublish"></a>
 
-### 9. 取消资源发布
+### 8. 取消资源发布
 
 调用资源表对象的 Unpublish() 方法可取消该资源表内所有文件的静态外链。
 
@@ -417,13 +457,13 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $accessDomain = 'cdn.example.com';
 
     /**
-     * 将 CustomTableName 表里边的文件全部取消静态外链。
+     * 将 CustomBucketName 表里边的文件全部取消静态外链。
      */
     list($code, $result) = $rs->Unpublish($accessDomain);
     echo "===> Unpublish to $accessDomain result:\n";
@@ -436,7 +476,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Delete"></a>
 
-### 10. 删除已上传的文件
+### 9. 删除已上传的文件
 
 要删除指定的文件，只需调用资源表对象的 Delete() 方法并传入 文件ID（key）作为参数即可。如下示例代码：
 
@@ -446,7 +486,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $key = 'an_unique_key_also_can_be_a_file_name';
@@ -465,7 +505,7 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
 
 <a name="rs-Drop"></a>
 
-### 11. 删除所有文件（单个“表”）
+### 10. 删除所有文件（单个“表”）
 
 要删除整个资源表及该表里边的所有文件，可以调用资源表对象的 Drop() 方法。
 
@@ -477,14 +517,14 @@ BatchGet() 方法有一个参数，参数类型为数组 Array，该参数可以
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     /**
      * 删除整个表及其所有文件
      */
 	list($code, $error) = $rs->Drop();
-	echo "===> Drop table result:\n";
+	echo "===> Drop Bucket result:\n";
 	if ($code == 200) {
 		echo "Drop $bucket ok!\n";
 	} else {
@@ -523,7 +563,7 @@ $imageDownloadURL
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $fileKey = 'an_unique_key_also_can_be_a_file_name';
@@ -592,7 +632,7 @@ $thumbType
     /**
      * 实例化资源表对象
      */
-    $bucket = 'CustomTableName';
+    $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
 
     $fileKey = 'an_unique_key_also_can_be_a_file_name';
@@ -690,6 +730,7 @@ $mogrify_options
 为了使得调用 `$imgrs->ImageMogrifyAs()` 方法有实际意义，客户方的业务服务器必须保存 `thumbnails_bucket` 和 `$imgrs.ImageMogrifyAs` 方法中参数 `$target_key` 的值。如此，该缩略图作为一个新文件可以使用 SDK 提供的任何方法。
 
 
+
 ## SDK使用案例
 
 <a name="web-upload-files-directly"></a>
@@ -720,16 +761,30 @@ $mogrify_options
     ├── lib
     │   ├── config.php
     │   ├── pdo.class.php
-    │   └── qboxsdk
-    │       ├── oauth/
-    │       ├── client
-    │       │   ├── curl.php
-    │       │   └── rs.php
-    │       ├── config.php
-    │       ├── fileop.php
-    │       ├── oauth.php
-    │       ├── rs.php
-    │       └── utils.php
+	|	└── qbox
+	|	    ├── authtoken.php
+	|	    ├── authtoken_demo.php
+	|	    ├── client
+	|	    │   ├── curl.php
+	|	    │   └── rs.php
+	|	    ├── config.php
+	|	    ├── eu.php
+	|	    ├── eu_demo.php
+	|	    ├── fileop.php
+	|	    ├── fileop_demo.php
+	|	    ├── oauth
+	|	    │   ├── Client.php
+	|	    │   ├── GrantType
+	|	    │   │   ├── AuthorizationCode.php
+	|	    │   │   ├── ClientCredentials.php
+	|	    │   │   ├── IGrantType.php
+	|	    │   │   ├── Password.php
+	|	    │   │   └── RefreshToken.php
+	|	    │   └── README
+	|	    ├── oauth.php
+	|	    ├── rs.php
+	|	    ├── rs_demo.php
+	|	    └── utils.php    
     ├── public
         ├── bootstrap.php
         ├── callback.php
@@ -749,11 +804,12 @@ $mogrify_options
             └── swfupload
                 ├── swfupload.js
                 ├── swfupload.swf
-                └── swfuploadbutton.swf
+                └── swfuploadbutton.swf                                                                                                     
+        
 
-首先，我们需要编辑 `lib/qboxsdk/config.php` 文件配置相应的 Access Key 和 Secret Key 。
+首先，我们需要编辑 `lib/qiniu/config.php` 文件配置相应的 Access Key 和 Secret Key 。
 
-$ vim lib/qboxsdk/config.php
+$ vim lib/qiniu/config.php
 
     const ACCESS_KEY = '<Please apply your access key>';
     const SECRET_KEY = '<Dont send your secret key to anyone>';
@@ -762,181 +818,200 @@ $ vim lib/qboxsdk/config.php
 
 $ vim public/boostrap.php
 
-    /**
-     * 定义网站目录结构
-     */
-    define('ROOT_DIR', str_replace(array('\\\\', '//'), DIRECTORY_SEPARATOR, dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
-    define('LIB_DIR', ROOT_DIR . 'lib' . DIRECTORY_SEPARATOR);
-    define('QBOX_SDK_DIR', LIB_DIR . 'qbox' . DIRECTORY_SEPARATOR);
+	/**
+	 * 定义网站目录
+	 */
+	define('ROOT_DIR', str_replace(array('\\\\', '//'), DIRECTORY_SEPARATOR, dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
+	define('LIB_DIR', ROOT_DIR . 'lib' . DIRECTORY_SEPARATOR);
+	define('QBOX_SDK_DIR', LIB_DIR . 'qiniu' . DIRECTORY_SEPARATOR . 'qbox' . DIRECTORY_SEPARATOR);
 
-    /**
-     * 加载配置文件
-     */
-    require_once LIB_DIR . 'config.php';
-    require_once LIB_DIR . 'pdo.class.php';
+	/**
+	 * 加载配置文件
+	 */
+	require_once LIB_DIR . 'config.php';
+	require_once LIB_DIR . 'helper.php';
+	require_once LIB_DIR . 'pdo.class.php';
 
-    /**
-     * 设置错误报告级别
-     */
-    error_reporting($config['error']['reporting']);
+	require_once QBOX_SDK_DIR . 'rs.php';
+	require_once QBOX_SDK_DIR . 'fileop.php';
+	require_once QBOX_SDK_DIR . 'client/rs.php';
+	require_once QBOX_SDK_DIR . 'authtoken.php';
 
-    /**
-     * 初始化数据库连接句柄
-     */
-    $db = Core_Db::getInstance($config["db"]);
+	/**
+	 * 设置错误报告级别
+	 */
+	error_reporting($config['error']['reporting']);
 
-    /**
-     * 加载QBoxSDK类库文件
-     */
-    require_once QBOX_SDK_DIR . 'oauth.php';
-    require_once QBOX_SDK_DIR . 'rs.php';
-    require_once QBOX_SDK_DIR . 'fileop.php';
-    require_once QBOX_SDK_DIR . 'client/rs.php';
+	/**
+	 * 初始化数据库连接句柄
+	 */
+	$db = Core_Db::getInstance($config["db"]);
 
-    /**
-     * 初始化 OAuth Client Transport
-     */
-    $client = QBox\OAuth2\NewClient();
+	/**
+	 * 配置七牛云存储密钥信息
+	 */
+	$QBOX_ACCESS_KEY = $config["qbox"]["access_key"];
+	$QBOX_SECRET_KEY = $config["qbox"]["secret_key"];
 
-    /**
-     * 初始化 Qbox Reource Service Transport
-     */
-    $tableName = $config["qbox"]["tb_name"];
-    $rs = QBox\RS\NewService($client, $tableName);
+	/**
+	 * 初始化 OAuth Client Transport
+	 */
+	$client = QBox\OAuth2\NewClient();
+
+	/**
+	 * 初始化 Qbox Reource Service Transport
+	 */
+	$bucket = $config["qbox"]["bucket"];
+	$rs = QBox\RS\NewService($client, $bucket);
+	$upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
+
 
 接下来，我们在上传页面中引入并调用 SWFUpload 组件。
 
 $ vim public/upload.php
 
     <?php
-    require_once 'bootstrap.php';
+	require_once 'bootstrap.php';
 
-    /**
-     * 调用资源表对象的 PutAuth() 方法
-     * 取得上传授权（生成一个短期有效的可匿名上传URL）
-     */
-    list($result, $code, $error) = $rs->PutAuth();
-    echo "===> PutAuth result:\n";
-    if ($code == 200) {
-        $upload_url = $result["url"];
-    } else {
-        $msg = QBox\ErrorMessage($code, $error);
-        die("PutFile failed: $code - $msg\n");
-    }
+	if (empty($_COOKIE["uid"]) || (int)$_COOKIE["uid"] < 1) {
+	    header("Location: login.php");
+	    exit;
+	}
+	$uid = $_COOKIE["uid"];
+	$userinfo = $db->getOne("SELECT username FROM users WHERE id='$uid' LIMIT 1");
+	$username = $userinfo["username"];
 
-    ?>
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml" >
-    <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>QBox OpenSDK Demo - Upload Demo</title>
-    <script type="text/javascript">
-        var rsTableName = '<?php echo $tableName; ?>';
-    </script>
-    <link href="css/default.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/utf8_encode.js"></script>
-    <script type="text/javascript" src="js/base64_encode.js"></script>
-    <script type="text/javascript" src="js/uniqid.js"></script>
-    <script type="text/javascript" src="js/helper.js"></script>
-    <script type="text/javascript" src="swfupload/swfupload.js"></script>
-    <script type="text/javascript" src="js/swfupload.queue.js"></script>
-    <script type="text/javascript" src="js/fileprogress.js"></script>
-    <script type="text/javascript" src="js/handlers.js"></script>
-    <script type="text/javascript">
-    var swfu;
-    window.onload = function() {
-      var settings = {
-        flash_url : "/assets/swfupload/swfupload.swf",
-        upload_url: "<?php echo $upload_url; ?>",
-        post_params: {},
-        use_query_string: false,
-        file_post_name: "file",
-        file_size_limit : "10 MB",
-        file_types : "*.png;*.jpg;*.jpeg;*.gif",
-        file_types_description: "Web Image Files",
-        file_upload_limit : 100,
-        file_queue_limit : 0,
-        custom_settings : {
-            fileUniqIdMapping : {},
-            progressTarget : "fsUploadProgress",
-            cancelButtonId : "btnCancel"
-        },
-        debug: false,
+	?>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" >
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>相册 - 上传图片</title>
+	<script type="text/javascript">
+	    var $bucket = '<?php echo $bucket; ?>';
+	    var $upToken = '<?php echo $upToken;?>';
+	</script>
+	<link href="assets/css/default.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="assets/js/jquery.js"></script>
+	<script type="text/javascript" src="assets/js/utf8_encode.js"></script>
+	<script type="text/javascript" src="assets/js/utf8_decode.js"></script>
+	<script type="text/javascript" src="assets/js/base64_encode.js"></script>
+	<script type="text/javascript" src="assets/js/base64_decode.js"></script>
+	<script type="text/javascript" src="assets/js/uniqid.js"></script>
+	<script type="text/javascript" src="assets/js/helper.js"></script>
+	<script type="text/javascript" src="assets/swfupload/swfupload.js"></script>
+	<script type="text/javascript" src="assets/js/swfupload.queue.js"></script>
+	<script type="text/javascript" src="assets/js/fileprogress.js"></script>
+	<script type="text/javascript" src="assets/js/handlers.js"></script>
+	<script type="text/javascript">
+	    var swfu;
 
-        // Button Settings
-        button_image_url : "/assets/images/XPButtonUploadText_61x22.png",
-        button_placeholder_id : "spanButtonPlaceholder1",
-        button_width: 61,
-        button_height: 22,
+	    window.onload = function() {
+	        var settings = {
+	            flash_url : "assets/swfupload/swfupload.swf",
+	            upload_url:  "<?php echo QBOX_UP_HOST . "/upload"; ?>",
+	            post_params: {},
+	            use_query_string: false,
+	            file_post_name: "file",
+	            file_size_limit : "10 MB",
+	            file_types : "*.png;*.jpg;*.jpeg;*.gif",
+	            file_types_description: "Web Image Files",
+	            file_upload_limit : 100,
+	            file_queue_limit : 0,
+	            custom_settings : {
+	                fileUniqIdMapping : {},
+	                progressTarget : "fsUploadProgress",
+	                cancelButtonId : "btnCancel"
+	            },
+	            debug: false,
 
-        // The event handler functions are defined in handlers.js
-        file_queued_handler : fileQueued,
-        file_queue_error_handler : fileQueueError,
-        file_dialog_complete_handler : fileDialogComplete,
-        upload_start_handler : uploadStart,
-        upload_progress_handler : uploadProgress,
-        upload_error_handler : uploadError,
-        upload_success_handler : uploadSuccess,
-        upload_complete_handler : uploadComplete,
-        queue_complete_handler : queueComplete // Queue plugin event
-      };
+	            // Button Settings
+	            button_image_url : "assets/images/XPButtonUploadText_61x22.png",
+	            button_placeholder_id : "spanButtonPlaceholder1",
+	            button_width: 61,
+	            button_height: 22,
 
-      swfu = new SWFUpload(settings);
-    };
-    </script>
-    </head>
-    <body>
-    <div id="content">
-        <p>请选择任意图片，支持批量多选上传。</p>
-        <br />
-        <form method="post" enctype="multipart/form-data">
-            <div class="fieldset flash" id="fsUploadProgress">
-                <span class="legend">上传列表</span>
-            </div>
-            <div id="divStatus">0 Files Uploaded</div>
-            <div style="padding-left: 5px;">
-                <span id="spanButtonPlaceholder1"></span>
-                <input id="btnCancel" type="button" value="Cancel All Uploads"
-                 onclick="swfu.cancelQueue();" disabled="disabled"
-                 style="margin-left: 2px; height: 22px; font-size: 8pt;" />
-            </div>
-        </form>
-    </div>
-    </body>
-    </html>
+	            // The event handler functions are defined in handlers.js
+	            file_queued_handler : fileQueued,
+	            file_queue_error_handler : fileQueueError,
+	            file_dialog_complete_handler : fileDialogComplete,
+	            upload_start_handler : uploadStart,
+	            upload_progress_handler : uploadProgress,
+	            upload_error_handler : uploadError,
+	            upload_success_handler : uploadSuccess,
+	            upload_complete_handler : uploadComplete,
+	            queue_complete_handler : queueComplete	// Queue plugin event
+		};
+
+		swfu = new SWFUpload(settings);
+	    };
+	</script>
+	</head>
+	<body>
+
+	<p>欢迎您，<?php echo $username; ?></p>
+	<h4>
+	    <a href="index.php">返回列表</a>
+	    <a href="logout.php">注销退出</a>
+	</h4>
+
+	<div id="content">
+	    <p>请选择任意图片，支持批量多选上传。</p>
+	    <br />
+	    <form id="form1" action="index.php" method="post" enctype="multipart/form-data">
+	        <div class="fieldset flash" id="fsUploadProgress">
+	            <span class="legend">上传列表</span>
+	        </div>
+	        <div id="divStatus">0 Files Uploaded</div>
+
+	        <div style="padding-left: 5px;">
+	            <span id="spanButtonPlaceholder1"></span>
+	            <input id="btnCancel" type="button" value="Cancel All Uploads" onclick="swfu.cancelQueue();" disabled="disabled" style="margin-left: 2px; height: 22px; font-size: 8pt;" />
+	        </div>
+	    </form>
+	</div>
+
+	</body>
+	</html>
 
 在如上代码JavaScript的settings变量中，我们设定 SWFUpload 上传过程中的各种钩子回调都与 public/assets/js/handlers.js 里边定义的事件函数一一对应。在上传每一个文件前都需要给SWFUpload隐形表单动态增加一个名字为action的input域（字段），用以构建七牛云存储上传文件接口的标准multipart-form所需要的元素（名为params的input域是可选的，若不传七牛云存储服务端不会向应用的业务服务器发送回调）。
 
 要在开始上传文件前给SWFUpload隐形表单动态添加字段，只需修改 public/assets/js/handlers.js 文件中的 uploadStart() 函数：
 
-    // 定义一个文件上传前要执行的业务逻辑
-    function uploadStart(file) {
-      try {
-        var progress = new FileProgress(file, this.customSettings.progressTarget);
-        progress.setStatus("Uploading...");
-        progress.toggleCancel(true, this);
+	/*
+	 * 定义一个文件上传前要执行的业务逻辑
+	 */
+	function uploadStart(file) {
+		try {
+			var progress = new FileProgress(file, this.customSettings.progressTarget);
+			progress.setStatus("Uploading...");
+			progress.toggleCancel(true, this);
 
-        // 首先，为该文件生成一个唯一ID
-        // uniqid() 函数在 public/assets/js/uniqid.js 文件中有定义
-        var fileUniqKey = uniqid(file.name);
+	                // 首先，为该文件生成一个唯一ID
+	                // uniqid() 函数在 public/assets/js/uniqid.js 文件中有定义
+	                var fileUniqKey = uniqid(file.name);
+	                
+	                // 然后构造 action 表单域的值
+	                // generate_rs_put_path() 在 public/assets/js/helper.js 中有定义
+	                var action = generate_rs_put_path($bucket, fileUniqKey, file.type);
 
-        // 然后构造 action 表单域的值，generate_rs_put_path() 在 public/assets/js/helper.js 中有定义
-        var action = generate_rs_put_path(rsTableName, fileUniqKey, file.type);
+	                // 给隐形表单添加名为 action 的 input 域（字段）
+	                this.addPostParam("action", action);
 
-        // 给隐形表单添加名为 action 的 input 域（字段）
-        this.addPostParam("action", action);
+	                // 给隐形表单添加名为 params 的 input 域（字段）
+	                // params 里边的数据，用于文件上传成功后，七牛云存储服务器向我们的业务服务器执行 POST 回调
+	                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type);
+	                
+	                // 给隐形表单添加 名为 auth 的 input 域 （字段）
+	                this.addPostParam("auth", $upToken);
+	                
+	                // 将该文件唯一ID临时保存起来供后续使用
+	                this.customSettings.fileUniqIdMapping[file.id] = fileUniqKey;
+		}
+		catch (ex) {}
 
-        // 给隐形表单添加名为 params 的 input 域（字段）
-        // params 里边的数据，用于文件上传成功后，七牛云存储服务器向我们的业务服务器执行 POST 回调
-        this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type);
-
-        // 将该文件唯一ID临时保存起来供后续使用
-        this.customSettings.fileUniqIdMapping[file.id] = fileUniqKey;
-      } catch (ex) {}
-      return true;
-    }
+		return true;
+	}
 
 根据代码注释想必你能看到我们做了什么事情，目的只有一个，给上传用的隐形表单在上传文件之前添加一个名为action的表单域。上面的 generate_rs_put_path() 函数在 public/assets/js/helper.js 中有定义，作用是生成 action 表单域的值，其值的规格为："/rs-put/\<[EncodedEntryURI](/v2/api/words/#EncodedEntryURI)\>/mimeType/\<[EncodedMimeType](/v2/api/words/#EncodedMimeType)\>"
 
