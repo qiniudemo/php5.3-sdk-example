@@ -149,6 +149,19 @@ function CallNoRet($client, $url) {
 }
 
 /**
+ * func CallWithParamsNoRet(client *Client, url string, params stringOrArray) => (code int, err Error)
+ */
+function CallWithParamsNoRet($client, $url, $params) {
+
+	$response = $client->fetch($url, $params, $client::HTTP_METHOD_POST, null, $client::HTTP_FORM_CONTENT_TYPE_APPLICATION);
+	$code = $response['code'];
+	if ($code === 200) {
+		return array(200, null);
+	}
+	return array($code, $response['result']);
+}
+
+/**
  * func CallWithBinary(client *Client, url string, fp File, bytes int64, timeout int) => (result array, code int, err Error)
  */
 function CallWithBinary($client, $url, $fp, $bytes, $timeout) {
