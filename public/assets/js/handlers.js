@@ -87,6 +87,7 @@ function uploadStart(file) {
                 
                 this.addPostParam("token", $upToken);
 
+                this.addPostParam("key", fileUniqKey);
                 this.addPostParam("x:action", "insert");
                 this.addPostParam("x:file_key", fileUniqKey); 
                 this.addPostParam("x:file_name", file.name); 
@@ -124,26 +125,13 @@ function uploadSuccess(file, serverData) {
 		progress.setStatus("Complete.");
 		progress.toggleCancel(false);
 
-                // 取出之前在 uploadStart() 暂存的文件唯一ID
-                var fileUniqKey = this.customSettings.fileUniqIdMapping[file.id];
+                var ret = eval('(' + serverData + ')'); 
+                if (ret.code == 200) {
+                    alert("上传成功！");
+                } else {
+                    alert("上传失败");
+                }
 
-                // 组织要回调给网站业务服务器的数据
-                /*
-                $.ajax({
-                    type: "POST",
-                    url: 'op.php',
-                    processData: true,
-                    data: {"action": "image_preview", "type": 1, "key": fileUniqKey},
-                    dataType: "json",
-                    beforeSend: function(){},
-                    complete: function(){},
-                    success:function(resp){
-                        if(resp.code == 200) {
-                            alert(resp.data.url);
-                        }
-                    }
-                });
-                */
 	} catch (ex) {
 		this.debug(ex);
 	}
