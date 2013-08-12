@@ -1,5 +1,5 @@
 
-一个基于 [七牛云存储](http://www.qiniutek.com) [PHP 5.3 SDK](https://github.com/qiniu/php5.3-sdk) 开发的示例相册程序。
+一个基于 [七牛云存储](http://www.qiniu.com) [PHP SDK](http://docs.qiniu.com/php-sdk/index.html) 开发的示例相册程序。
 
 ## 运行环境
 
