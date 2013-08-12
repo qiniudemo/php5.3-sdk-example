@@ -28,10 +28,10 @@ $config = array(
 
     # qiniu account
     'qbox' => array(
-        'access_key' => '<your access key>',
-        'secret_key' => '<your secret key>',
-        'bucket'     => '<your bucket; Example: t-test-public>',
-        'domain' => '<your qiniu domain; Example: t-test-public.qiniudn.com>',
+        'access_key' => '<YOUR ACCESS KEY>',
+        'secret_key' => '<YOUR SECRET KEY>',
+        'bucket'     => '<YOUR BUCKET NAME>',
+        'domain' => '<YOUR DOMAIN; EXAMPLE:t-test-public.qiniudn.com>',
         #do not edit the following two options
         'callback_url' => HOST . 'callback.php',
         'callback_body' => 'action=$(x:action)&uid=$(x:uid)&file_key=$(x:file_key)&file_name=$(x:file_name)&file_size=$(x:file_size)&file_type=$(x:file_type)',

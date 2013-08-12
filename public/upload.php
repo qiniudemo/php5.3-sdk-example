@@ -61,8 +61,8 @@ $username = $userinfo["username"];
                 progressTarget : "fsUploadProgress",
                 cancelButtonId : "btnCancel"
             },
-            //debug: false,
-            debug: true,
+            debug: false,
+            //debug: true,
 
             // Button Settings
             button_image_url : "assets/images/XPButtonUploadText_61x22.png",

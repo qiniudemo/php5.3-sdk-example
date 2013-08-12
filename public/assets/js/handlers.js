@@ -187,6 +187,7 @@ function uploadError(file, errorCode, message) {
 	} catch (ex) {
         this.debug(ex);
     }
+    alert("上传失败");
 }
 
 function uploadComplete(file) {
