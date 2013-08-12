@@ -85,20 +85,15 @@ function uploadStart(file) {
                 // uniqid() 函数在 public/assets/js/uniqid.js 文件中有定义
                 var fileUniqKey = uniqid(file.name);
                 
-                // 然后构造 action 表单域的值
-                // generate_rs_put_path() 在 public/assets/js/helper.js 中有定义
-                var action = generate_rs_put_path($bucket, fileUniqKey, file.type);
+                this.addPostParam("token", $upToken);
 
-                // 给隐形表单添加名为 action 的 input 域（字段）
-                this.addPostParam("action", action);
-
-                // 给隐形表单添加名为 params 的 input 域（字段）
-                // params 里边的数据，用于文件上传成功后，七牛云存储服务器向我们的业务服务器执行 POST 回调
-                this.addPostParam("params", "filename="+file.name+"&filekey="+fileUniqKey+"&filetype="+file.type);
-                
-                // 给隐形表单添加 名为 auth 的 input 域 （字段）
-                this.addPostParam("auth", $upToken);
-                
+                this.addPostParam("x:action", "insert");
+                this.addPostParam("x:file_key", fileUniqKey); 
+                this.addPostParam("x:file_name", file.name); 
+                this.addPostParam("x:file_size", file.size); 
+                this.addPostParam("x:file_type", file.type); 
+                this.addPostParam("x:uid", $uid); 
+ 
                 // 将该文件唯一ID临时保存起来供后续使用
                 this.customSettings.fileUniqIdMapping[file.id] = fileUniqKey;
 	}
@@ -133,27 +128,6 @@ function uploadSuccess(file, serverData) {
                 var fileUniqKey = this.customSettings.fileUniqIdMapping[file.id];
 
                 // 组织要回调给网站业务服务器的数据
-                var postData = {
-                    "action": "insert",
-                    "file_key": fileUniqKey,
-                    "file_name": file.name,
-                    "file_size": file.size,
-                    "file_type": file.type
-                };
-
-                // 通过AJAX异步向网站业务服务器POST数据
-                $.ajax({
-                    type: "POST",
-                    url: 'callback.php',
-                    processData: true,
-                    data: postData,
-                    dataType: "json",
-                    beforeSend: function(){},
-                    complete: function(){},
-                    success:function(resp){}
-                });
-
-                // 预览
                 /*
                 $.ajax({
                     type: "POST",

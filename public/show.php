@@ -26,12 +26,9 @@ if (isset($_GET["id"])) {
     $attName = $fileRow["file_name"];
 
     if (!empty($id)) {
-        list($result, $code, $error) = $rs->Get($key, $attName);
-        if ($code == 200) {
-            $previewURL = QBox\FileOp\ImagePreviewURL($result['url'], 0);
-        } else {
-            $errnum = $code;
-            $errmsg = QBox\ErrorMessage($code, $error);
+        list($ret, $err) = Qiniu_RS_Stat($client, $bucket, $key);
+        if ($err == null) {
+            $base_url = Qiniu_RS_MakeBaseUrl($domain, $key);
         }
     }
 }
@@ -52,7 +49,7 @@ if (isset($_GET["id"])) {
 </h4>
 
 <?php
-if ($previewURL) {
+if ($base_url) {
 ?>
 
 <p>文件名：<?php echo $fileRow["file_name"]; ?></p>
@@ -62,7 +59,7 @@ if ($previewURL) {
   <a href="download.php?id=<?php echo $fileRow["id"]; ?>" title="点击下载原始尺图片">下载</a>
   <a href="delete.php?id=<?php echo $fileRow["id"]; ?>" title="点击将该图片删除">删除</a>
 </p>
-<img src="<?php echo $previewURL; ?>" />
+<img src="<?php echo $base_url; ?>" />
 
 <?php
 } else {
@@ -70,8 +67,6 @@ if ($previewURL) {
 
 <p>出错啦，请您稍后再试！</p>
 <br />
-<p>错误码：<?php echo $errnum; ?></p>
-<p>出错信息：<?php echo $errmsg; ?></p>
 
 <?php
 }

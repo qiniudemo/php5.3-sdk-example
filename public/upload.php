@@ -46,7 +46,7 @@ $username = $userinfo["username"];
     window.onload = function() {
         var settings = {
             flash_url : "assets/swfupload/swfupload.swf",
-            upload_url:  "<?php echo QBOX_UP_HOST . "/upload"; ?>",
+            upload_url:  "<?php echo $QINIU_UP_HOST ?>",
             post_params: {},
             use_query_string: false,
             file_post_name: "file",

@@ -13,10 +13,10 @@ header('Content-type: application/json');
 
 require_once 'bootstrap.php';
 
-if (empty($_COOKIE["uid"]) || (int)$_COOKIE["uid"] < 1) {
+if (empty($_POST["uid"]) || (int)$_POST["uid"] < 1) {
     die(json_encode(array("code" => 401, "data" => array("errmsg" => "unauthorized"))));
 }
-$uid = $_COOKIE["uid"];
+$uid = $_POST["uid"];
 
 /**
  * 响应并分发请求

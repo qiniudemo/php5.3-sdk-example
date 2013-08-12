@@ -18,7 +18,7 @@ date_default_timezone_set('Asia/Shanghai');
  */
 define('ROOT_DIR', str_replace(array('\\\\', '//'), DIRECTORY_SEPARATOR, dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
 define('LIB_DIR', ROOT_DIR . 'lib' . DIRECTORY_SEPARATOR);
-define('QBOX_SDK_DIR', LIB_DIR . 'qiniu' . DIRECTORY_SEPARATOR . 'qbox' . DIRECTORY_SEPARATOR);
+define('QBOX_SDK_DIR', LIB_DIR . 'qiniu' . DIRECTORY_SEPARATOR);
 
 /**
  * 加载配置文件
@@ -28,9 +28,6 @@ require_once LIB_DIR . 'helper.php';
 require_once LIB_DIR . 'pdo.class.php';
 
 require_once QBOX_SDK_DIR . 'rs.php';
-require_once QBOX_SDK_DIR . 'fileop.php';
-require_once QBOX_SDK_DIR . 'client/rs.php';
-require_once QBOX_SDK_DIR . 'authtoken.php';
 
 /**
  * 设置错误报告级别
@@ -45,17 +42,18 @@ $db = Core_Db::getInstance($config["db"]);
 /**
  * 配置七牛云存储密钥信息
  */
-$QBOX_ACCESS_KEY = $config["qbox"]["access_key"];
-$QBOX_SECRET_KEY = $config["qbox"]["secret_key"];
+$qiniu_access_key = $config["qbox"]["access_key"];
+$qiniu_secret_key = $config["qbox"]["secret_key"];
 
-/**
- * 初始化 OAuth Client Transport
- */
-$client = QBox\OAuth2\NewClient();
+$qiniu_up_host = $config['qbox']['up_host'];
 
-/**
- * 初始化 Qbox Reource Service Transport
- */
 $bucket = $config["qbox"]["bucket"];
-$rs = QBox\RS\NewService($client, $bucket);
-$upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
+Qiniu_SetKeys($qiniu_access_key, $qiniu_secret_key);
+$putPolicy = new Qiniu_RS_PutPolicy($bucket);
+$putPolicy->CallbackUrl = $config['qbox']['callback_url'];
+$putPolicy->CallbackBody = $config['qbox']['callback_body'];
+$upToken = $putPolicy->Token(null);
+
+$client = new Qiniu_MacHttpClient(null);
+
+$domain = $config['qbox']['domain'];

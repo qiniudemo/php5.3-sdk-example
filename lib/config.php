@@ -30,7 +30,11 @@ $config = array(
     'qbox' => array(
         'access_key' => '<Please apply your access key>',
         'secret_key' => '<Dont send your secret key to anyone>',
-        'bucket'     => 'photo360_albums',
+        'bucket'     => '',
+        'domain' => '',
+        'up_host' => '',
+        'callback_url' => HOST . 'callback.php',
+        'callback_body' => 'uid=($x:uid)&file_key=($x:file_key)&file_name=($x:file_name)&file_size=($x:file_size)&file_type=($x:file_type)',
     ),
 
 );
