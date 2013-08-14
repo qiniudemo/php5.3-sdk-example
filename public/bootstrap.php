@@ -45,7 +45,7 @@ $db = Core_Db::getInstance($config["db"]);
 $qiniu_access_key = $config["qbox"]["access_key"];
 $qiniu_secret_key = $config["qbox"]["secret_key"];
 
-$qiniu_up_host = $config['qbox']['up_host'];
+#$qiniu_up_host = $config['qbox']['up_host'];
 
 $bucket = $config["qbox"]["bucket"];
 Qiniu_SetKeys($qiniu_access_key, $qiniu_secret_key);
