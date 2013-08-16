@@ -24,7 +24,6 @@ if (isset($_GET["id"])) {
 
     $key = $fileRow["file_key"];
     $attName = $fileRow["file_name"];
-
     if (!empty($id)) {
         list($ret, $err) = Qiniu_RS_Stat($client, $bucket, $key);
         if ($err == null) {
