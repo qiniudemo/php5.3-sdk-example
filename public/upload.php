@@ -27,6 +27,7 @@ $username = $userinfo["username"];
 <script type="text/javascript">
     var $bucket = '<?php echo $bucket; ?>';
     var $upToken = '<?php echo $upToken;?>';
+    var $uid = <?php echo $uid ?>;
 </script>
 <link href="assets/css/default.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="assets/js/jquery.js"></script>
@@ -46,7 +47,7 @@ $username = $userinfo["username"];
     window.onload = function() {
         var settings = {
             flash_url : "assets/swfupload/swfupload.swf",
-            upload_url:  "<?php echo QBOX_UP_HOST . "/upload"; ?>",
+            upload_url:  "<?php echo $QINIU_UP_HOST ?>",
             post_params: {},
             use_query_string: false,
             file_post_name: "file",
@@ -61,6 +62,7 @@ $username = $userinfo["username"];
                 cancelButtonId : "btnCancel"
             },
             debug: false,
+            //debug: true,
 
             // Button Settings
             button_image_url : "assets/images/XPButtonUploadText_61x22.png",

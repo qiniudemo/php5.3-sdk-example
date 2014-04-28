@@ -24,9 +24,10 @@ if (isset($_GET["id"])) {
     $attName = $fileRow["file_name"];
 
     if (!empty($key)) {
-        list($result, $code, $error) = $rs->Get($key, $attName);
-        if ($code == 200) {
-            header("Location: $result[url]");
+        list($ret, $err) = Qiniu_RS_Stat($client, $bucket, $key);
+        if ($err == null) {            
+            $base_url = Qiniu_RS_MakeBaseUrl($domain, $key);
+            header("Location: $base_url");
             exit;
         }
     }

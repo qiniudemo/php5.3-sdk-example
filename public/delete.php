@@ -24,8 +24,8 @@ if (isset($_GET["id"])) {
     # if is this user ok, then
     if ((int)$userRow["id"] > 0 && !empty($id)) {
         $fileRow = $db->getOne("SELECT file_key FROM uploads WHERE id='$id' LIMIT 1");
-        list($code, $error) = $rs->Delete($fileRow["file_key"]);
-        if ($code == 200) {
+        $err = Qiniu_RS_Delete($client, $bucket, $fileRow['file_key']);
+        if ($err == null) {
             $res = $db->execute("DELETE FROM uploads WHERE id='$id' AND user_id='$uid'");
         }
     }

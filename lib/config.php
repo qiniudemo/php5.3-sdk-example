@@ -28,9 +28,13 @@ $config = array(
 
     # qiniu account
     'qbox' => array(
-        'access_key' => '<Please apply your access key>',
-        'secret_key' => '<Dont send your secret key to anyone>',
-        'bucket'     => 'photo360_albums',
+        'access_key' => '<YOUR ACCESS KEY>',
+        'secret_key' => '<YOUR SECRET KEY>',
+        'bucket'     => '<YOUR BUCKET NAME>',
+        'domain' => '<YOUR DOMAIN; EXAMPLE:t-test-public.qiniudn.com>',
+        #do not edit the following two options
+        'callback_url' => HOST . 'callback.php',
+        'callback_body' => 'action=$(x:action)&uid=$(x:uid)&file_key=$(x:file_key)&file_name=$(x:file_name)&file_size=$(x:file_size)&file_type=$(x:file_type)',
     ),
 
 );
